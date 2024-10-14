@@ -1,0 +1,57 @@
+const express = require("express");
+const router = express.Router();
+const adminController = require("../Controller/Admin/adminController");
+const adminAuth = require("../middleware/adminAuth");
+const productImageUpload = require("../config/multer");
+const orderController=require("../Controller/Admin/orders")
+const categoryController=require("../Controller/Admin/category")
+const productController=require("../Controller/Admin/products")
+
+//----------------------------------------------------------------Login------------------------------------------------------------------------
+
+//admin login page load
+router.get("/login", adminAuth.isAdminLoged, adminController.loadAdminLogin);
+//admin login post
+router.post("/login", adminController.adminLogin);
+//admin logout
+router.get("/logout", adminController.logoutAdmin);
+
+//----------------------------------------------------------------dashBoard------------------------------------------------------------------------
+
+//admin dasboard
+router.get("/dashboard",adminAuth.checkAdminSession,adminController.adminDashBoard);
+//admin user management
+router.get("/users", adminAuth.checkAdminSession, adminController.adminUser);
+//admin user block
+router.patch("/users/:id", adminController.isBlock);
+
+//----------------------------------------------------------------category------------------------------------------------------------------------
+
+// admin category management
+router.get("/category",adminAuth.checkAdminSession,categoryController.adminCategory);
+// admin new category add
+router.post("/categories/add",adminAuth.checkAdminSession,categoryController.adminCategoryadd);
+//admin category listing
+router.patch("/category/:id", categoryController.isCategorylist);
+//admin category edit
+router.patch("/categories/edit/:id", categoryController.adminCategoryEdit);
+
+//----------------------------------------------------------------product------------------------------------------------------------------------
+
+//admin products
+router.get("/products",adminAuth.checkAdminSession,productController.adminProducts);
+//admin add products
+router.post("/add-product",productImageUpload.array("croppedImage[]", 3),productController.adminAddProduct);
+//admin produt edit modal
+router.get("/products/:id", productController.edit_product);
+router.patch("/products/:id",productImageUpload.array("croppedImage[]", 10),productController.editProductModal);
+//admin product list
+router.post("/products/:id", productController.isProductListed);
+
+//------------------------------------------------------------------orders---------------------------------------------------------------
+router.get('/orders',orderController.order)
+router.put('/orders/:orderId/status',orderController.changeStatus)
+router.post('/orders/:orderId/approve-cancellation', orderController.approveCancellation)
+router.get('/:orderId/details',orderController.orderDetails)
+
+module.exports = router;

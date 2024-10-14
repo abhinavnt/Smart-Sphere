@@ -1,0 +1,57 @@
+
+<%- include('partials/_header')%>
+    
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas me-2"></i>SmartSphere</a>
+            <form class="d-flex mx-auto search-bar">
+                <input class="form-control me-2" type="search" placeholder="Search the products" aria-label="Search">
+                <button class="btn" type="submit"><i class="fas fa-search text-white"></i></button>
+            </form>
+            <div class="d-flex align-items-center">
+                <a href="#" class="nav-icon"><i class="fas fa-home"></i></a>
+                <a href="#" class="nav-icon"><i class="far fa-heart"></i></a>
+                
+                <div class="nav-icon">
+                    <a href="#"><i class="far fa-user"></i></a>
+                    <ul class="dropdown-menu" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#">Profile</a></li>
+                        <li><a class="dropdown-item" href="#">Orders</a></li>
+                        <li><a class="dropdown-item" href="#">Settings</a></li>
+                        <li><a class="dropdown-item" href="#">Logout</a></li>
+                    </ul>
+                </div>
+
+                <a href="#" class="nav-icon"><i class="fas fa-shopping-cart"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <nav class="navbar navbar-expand-lg categories-nav">
+        <div class="container">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas me-2"></i> Categories
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                        <li><a class="dropdown-item" href="#">Bluetooth Speakers</a></li>
+                        <li><a class="dropdown-item" href="#">Headphones</a></li>
+                        <li><a class="dropdown-item" href="#">Smart Watches</a></li>
+                        <li><a class="dropdown-item" href="#">Powerbanks</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Products</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Today's Deals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Help Center</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <%- include('partials/_script')%>

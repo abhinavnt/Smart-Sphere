@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Page</title>
+    <link rel="stylesheet" href="/css/admin/category.css">
+    <link rel="stylesheet" href="/css/admin/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <%- include('partials/_sidebar') %>
+
+    <div class="main-content">
+        <%- include('partials/_topBar') %>
+        
+        <h2>Category</h2>
+    
+        <!-- Simple Search Bar -->
+        <input type="text" name="search" id="searchInput" placeholder="Search categories..." style="padding: 5px; width: 200px; margin-bottom: 10px;">
+        
+        <span id="msg" style="color: rgb(243, 9, 9); margin-left: 10%;"> <%= msg %></span>
+    
+        <div class="category-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Category Name</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                    <% categories.forEach(category => { %>
+                        <tr>
+                            <td><%= category.categoryName %></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <% if (category.isListed) { %>
+                                        <button class="unlist-btn-category" data-category-id="<%= category.id %>">Unlist</button>
+                                    <% } else { %>
+                                        <button class="list-btn-category" data-category-id="<%= category.id %>">List</button>
+                                    <% } %>
+                                    <button class="edit-btn-category" data-category-id="<%= category.id %>" data-category-name="<%= category.categoryName %>">Edit</button>
+                                </div>
+                            </td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    
+        <!-- Add Category Button -->
+        <button class="add-category-btn" id="openModalBtn">Add Category</button>
+    
+        <!-- Modal for Adding Category -->
+        <div id="addCategoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeModalBtn">&times;</span>
+                <h1>Add New Category</h1>
+                <form action="/admin/categories/add" method="POST">
+                    <label for="categoryName">Category Name:</label>
+                    <input type="text" id="categoryName" name="categoryName" required>
+                    <button type="submit" class="submit-btn">Add Category</button>
+                </form>
+            </div>
+        </div>
+    
+        <!-- Modal for Editing Category -->
+        <div id="editCategoryModal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" id="closeEditModalBtn">&times;</span>
+                <h1>Edit Category</h1>
+                <form id="editCategoryForm">
+                    <label for="editCategoryName">Category Name:</label>
+                    <input type="text" id="editCategoryName" name="categoryName" required>
+                    <button type="submit" class="submit-btn">Update Category</button>
+                </form>
+            </div>
+        </div>
+    
+        <!-- Pagination -->
+        <div class="pagination" id="paginationDiv">
+            <% for(let i = 1; i <= totalPages; i++) { %>
+                <a href="?page=<%= i %>" class="<%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+            <% } %>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/javascripts/admin/category.js"></script>
+</body>
+</html>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const searchInput = document.getElementById("searchInput");
+        const categoryTableBody = document.getElementById("categoryTableBody");
+
+        searchInput.addEventListener("input", function () {
+            const searchTerm = searchInput.value.toLowerCase(); // Convert search term to lowercase
+            const rows = categoryTableBody.getElementsByTagName("tr");
+
+            for (let i = 0; i < rows.length; i++) {
+                const categoryNameCell = rows[i].getElementsByTagName("td")[0];
+                if (categoryNameCell) {
+                    const categoryName = categoryNameCell.textContent || categoryNameCell.innerText;
+                    // Convert category name to lowercase for comparison
+                    if (categoryName.toLowerCase().indexOf(searchTerm) > -1) {
+                        rows[i].style.display = ""; // Show row
+                    } else {
+                        rows[i].style.display = "none"; // Hide row
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+

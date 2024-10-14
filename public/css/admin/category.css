@@ -1,0 +1,238 @@
+
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #181818;
+    color: #ffffff;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    width: 250px;
+    height: 100%;
+    background-color: #242424;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    padding-top: 20px;
+}
+.sidebar h1 {
+    text-align: center;
+    font-size: 22px;
+    color: #ff3366;
+    margin-bottom: 40px;
+}
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+.sidebar ul li {
+    margin-bottom: 20px;
+}
+.sidebar ul li a {
+    text-decoration: none;
+    color: #ccc;
+    font-size: 18px;
+    padding: 10px 20px;
+    display: block;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+.sidebar ul li a:hover {
+    background-color: #333;
+    color: #ff3366;
+}
+
+/* Main content */
+.main-content {
+    margin-left: 270px;
+    padding: 20px;
+}
+.main-content h2 {
+    font-size: 28px;
+    color: #fff;
+    margin-bottom: 20px;
+}
+
+/* Category Section */
+.category-section {
+    background-color: #333;
+    padding: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+}
+.category-section table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.category-section th, .category-section td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+.category-section th {
+    background-color: #444;
+    color: #fff;
+}
+.category-section td {
+    color: #ccc;
+}
+
+/* Action buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-btn {
+    color: #007bff;
+}
+.delete-btn {
+    color: #dc3545;
+}
+
+/* Add Category Button */
+.add-category-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #ff3366 !important;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-bottom: 20px;
+}
+.add-category-btn:hover {
+    background-color: #f40440 !important;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+.pagination a {
+    margin: 0 5px;
+    padding: 10px 15px;
+    background-color: #444;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.pagination a.active {
+    background-color: #ff3366;
+    color: #fff;
+}
+.pagination a:hover {
+    background-color:#f40440 ;
+}
+
+
+.add-category-btn {
+    display: inline-block;
+    margin-bottom: 20px;
+    margin-left: 20px;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.add-category-btn:hover {
+    background-color: #218838;
+}
+
+.list-btn-category {
+    background-color: green !important;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.unlist-btn-category {
+    background-color: #ff3366 !important; 
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5) !important; /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #131313;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 30%;
+    border-radius: 8px;
+}
+
+/* The Close Button */
+.close-btn {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close-btn:hover,
+.close-btn:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Input and submit button styles */
+input[type="text"], .submit-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.submit-btn {
+    background-color: #ff3366;
+    color: white;
+    border: none;
+}
+
+.submit-btn:hover {
+    background-color: #f40440;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,71 @@
+
+    <!-- addProduct.ejs -->
+    <div id="addProductModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Add New Product</h2>
+            <form id="addProductForm" method="POST" enctype="multipart/form-data" action="/admin/add-product">
+                <div>
+                    <label for="name">Product Name:</label>
+                    <input type="text" id="name" name="name">
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" placeholder="description"></textarea>
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="categoryID">Category:</label>
+                    <select id="categoryID" name="categoryID">
+                        <% categories.forEach((category)=> { %>
+                            <option value="<%= category._id %>">
+                                <%= category.categoryName %>
+                            </option>
+                        <% }); %>
+                    </select>
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="stock">Stock:</label>
+                    <input type="number" id="stock" name="stock" placeholder="stock count">
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="price">Price:</label>
+                    <input type="number" step="0.01" id="price" name="price" placeholder="price">
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="mainImage">Main Image:</label>
+                    <input type="file" id="mainImage" name="mainImage" accept="image/*" onchange="previewImage('mainImage')">
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="supportImage1">Supporting Image 1:</label>
+                    <input type="file" id="supportImage1" name="supportImage1" accept="image/*" onchange="previewImage('supportImage1')">
+                    <!-- Error message will appear here -->
+                </div>
+                <div>
+                    <label for="supportImage2">Supporting Image 2:</label>
+                    <input type="file" id="supportImage2" name="supportImage2" accept="image/*" onchange="previewImage('supportImage2')">
+                    <!-- Error message will appear here -->
+                </div>
+                <div id="cropContainer" style="display: none;">
+                    <h3>Crop Your Images</h3>
+                    <div id="cropPreviewContainer"></div>
+                    <button class="cropbutton" type="button" onclick="cropImages()">Crop Images</button>
+                </div>
+                <div id="croppedImagesContainer" style="display: none;">
+                    <h3>Cropped Images</h3>
+                    <div id="croppedImages"></div>
+                </div>
+                <div>
+                    <label for="colors">Colors:</label>
+                    <input type="text" id="colors" name="colors" placeholder="Comma-separated colors">
+                    <!-- Error message will appear here -->
+                </div>
+                <button class="cropbutton" type="submit">Add Product</button>
+            </form>
+        </div>
+    </div>

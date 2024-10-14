@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartsphere - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/signup.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container-fluid vh-100">
+        <div class="row h-100">
+            <div class="col-md-6 d-flex flex-column justify-content-center p-5">
+                <div class="mb-4">
+                    <span class="ms-2 fs-4 fw-bold">Smartsphere</span>
+                </div>
+                <h1 class="mb-4 fw-bold">Welcome Back</h1>
+                
+                <!-- Form Error Message (for backend errors like "user not found") -->
+                <span style="color: rgb(243, 9, 9); margin-left: 40%;" id="formMessage"></span>
+                
+                <p class="mb-4">
+                    Don't have an account? <a href="signUp" class="text-decoration-none">Sign up</a>
+                </p>
+
+                <!-- Google Sign-In Button -->
+                <div class="mb-3">
+                    <a href="/auth/google" class="btn btn-danger d-flex align-items-center justify-content-center" style="max-width: 300px; margin: 0 auto; background-color: #DB4437; border: none; border-radius: 25px;">
+                        <i class="fab fa-google fa-1x me-2"></i>
+                        <span>Continue with Google</span>
+                    </a>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" novalidate>
+                    <div class="mb-3">
+                        <input type="email" name="email" id="email" class="form-control form-control-lg" placeholder="Email" required>
+                        <!-- Email field error message -->
+                        <div class="error-message text-danger" id="emailError" style="display: none;">Please enter a valid email.</div>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <input type="password" name="password" class="form-control form-control-lg" id="password" placeholder="Password" required>
+                        <button type="button" class="password-toggle" id="togglePassword" onclick="togglePasswordVisibility()">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
+                        </button>
+                        <!-- Password field error message -->
+                        <div class="error-message text-danger" id="passwordError" style="display: none;">Please enter your password.</div>
+                    </div>
+                    <a href="/forgotmail" class="text-decoration-none d-flex justify-content-end">Forgot Password</a>
+                    
+                    <!-- Submit Login Button -->
+                    <button type="submit" class="btn btn-create-account btn-lg w-100 mb-3 text-white">Log in</button>
+                </form>
+
+                <!-- Demo Login Button (without functionality) -->
+                <a href="/demo"><button class="btn btn-secondary btn-lg w-100 mb-3" >Demo Login</button></a>  
+
+            </div>
+            <div class="col-md-6 d-none d-md-block bg-light-blue">
+                <div class="d-flex justify-content-center align-items-end h-100">
+                    <img src="/images/image.png" alt="Headphones" class="img-fluid" style="max-width: 80%;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Handle form submission using Axios
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            // Clear previous errors
+            document.getElementById('formMessage').innerText = '';
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('passwordError').style.display = 'none';
+
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            let hasError = false;
+
+            // Frontend validation for empty fields
+            if (!email) {
+                document.getElementById('emailError').style.display = 'block';
+                hasError = true;
+            }
+            if (!password) {
+                document.getElementById('passwordError').style.display = 'block';
+                hasError = true;
+            }
+
+            if (hasError) return; // Prevent form submission if validation fails
+
+            try {
+                // Make Axios request if no frontend validation errors
+                const response = await axios.post('/login', {
+                    email: email,
+                    password: password
+                });
+
+                // Handle success: Redirect to home or dashboard
+                if (response.data.success) {
+                    window.location.href = response.data.redirectUrl;
+                }
+            } catch (error) {
+                if (error.response && error.response.data) {
+                    // Handle errors returned by the backend
+                    const errorMessage = error.response.data.message;
+
+                    // Display backend error message
+                    document.getElementById('formMessage').innerText = errorMessage;
+                } else {
+                    // Handle any unexpected errors
+                    document.getElementById('formMessage').innerText = 'An unexpected error occurred. Please try again later.';
+                }
+            }
+        });
+
+        // Toggle password visibility
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>
