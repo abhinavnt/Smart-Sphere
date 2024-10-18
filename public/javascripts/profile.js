@@ -60,9 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
           const order = response.data;
 
           // Populate the modal with order details
-          document.getElementById("orderedDate").innerText = new Date(
-            order.orderedDate
-          ).toLocaleDateString();
+          document.getElementById("orderedDate").innerText = new Date(order.orderedDate).toLocaleDateString('en-IN');
           document.getElementById("orderTime").innerText = new Date(
             order.orderedDate
           ).toLocaleTimeString();
@@ -375,193 +373,167 @@ document.getElementById("profileForm").addEventListener("submit", function (e) {
 
 
 
+
+
 // to reset password
-document
-  .getElementById("resetPasswordBtn")
-  .addEventListener("click", function () {
-    const modal = new bootstrap.Modal(
-      document.getElementById("resetPasswordModal")
-    );
-    modal.show();
-    resetValidationMessages();
-  });
+document.getElementById('resetPasswordBtn').addEventListener('click', function() {
+  const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+  modal.show();
+  resetValidationMessages();
+});
 
-document
-  .getElementById("submitResetPassword")
-  .addEventListener("click", function () {
-    validateAndSubmit();
-  });
+document.getElementById('submitResetPassword').addEventListener('click', function() {
+  validateAndSubmit();
+});
 
-document
-  .getElementById("currentEmail")
-  .addEventListener("input", validateEmail);
-document
-  .getElementById("currentPassword")
-  .addEventListener("input", validateCurrentPassword);
-document
-  .getElementById("newPassword")
-  .addEventListener("input", validateNewPassword);
+document.getElementById('currentEmail').addEventListener('input', validateEmail);
+document.getElementById('currentPassword').addEventListener('input', validateCurrentPassword);
+document.getElementById('newPassword').addEventListener('input', validateNewPassword);
 
-document
-  .getElementById("toggleCurrentPassword")
-  .addEventListener("click", function () {
-    togglePasswordVisibility("currentPassword", "currentPasswordIcon");
-  });
+document.getElementById('toggleCurrentPassword').addEventListener('click', function() {
+  togglePasswordVisibility('currentPassword', 'currentPasswordIcon');
+});
 
-document
-  .getElementById("toggleNewPassword")
-  .addEventListener("click", function () {
-    togglePasswordVisibility("newPassword", "newPasswordIcon");
-  });
+document.getElementById('toggleNewPassword').addEventListener('click', function() {
+  togglePasswordVisibility('newPassword', 'newPasswordIcon');
+});
 
 function validateAndSubmit() {
   resetValidationMessages();
 
-  const currentEmail = document.getElementById("currentEmail").value;
-  const currentPassword = document.getElementById("currentPassword").value;
-  const newPassword = document.getElementById("newPassword").value;
+  const currentEmail = document.getElementById('currentEmail').value;
+  const currentPassword = document.getElementById('currentPassword').value;
+  const newPassword = document.getElementById('newPassword').value;
 
   let valid = true;
 
   if (!currentEmail) {
-    showError("currentEmail", "This field is required");
-    valid = false;
+      showError('currentEmail', 'This field is required');
+      valid = false;
   }
 
   if (!currentPassword) {
-    showError("currentPassword", "This field is required");
-    valid = false;
+      showError('currentPassword', 'This field is required');
+      valid = false;
   }
 
   if (!newPassword) {
-    showError("newPassword", "This field is required");
-    valid = false;
-  } else {
-    const passwordPattern =
-      /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
-    if (!passwordPattern.test(newPassword)) {
-      showError(
-        "newPassword",
-        "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters."
-      );
+      showError('newPassword', 'This field is required');
       valid = false;
-    }
+  } else {
+     
+      if (!passwordPattern.test(newPassword)) {
+          showError('newPassword', ' ');
+          valid = false;
+      }
   }
 
   if (!valid) {
-    return;
+      return;
   }
 
   const data = {
-    email: currentEmail,
-    currentPassword: currentPassword,
-    newPassword: newPassword,
+      email: currentEmail,
+      currentPassword: currentPassword,
+      newPassword: newPassword
   };
 
-  axios
-    .patch(`/resetPassword/${userId}`, data)
-    .then((response) => {
+  axios.patch(`/resetPassword/${userId}`, data)
+  .then(response => {
       Swal.fire({
-        title: "Success!",
-        text: "Password updated successfully!",
-        icon: "success",
-        confirmButtonText: "OK",
+          title: 'Success!',
+          text: 'Password updated successfully!',
+          icon: 'success',
+          confirmButtonText: 'OK'
       }).then(() => {
-        location.reload();
+          location.reload();
       });
-    })
-    .catch((error) => {
+  })
+  .catch(error => {
       if (error.response) {
-        Swal.fire({
-          title: "Error!",
-          text:
-            error.response.data.message ||
-            "Failed to update password. Please try again.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+          
+          Swal.fire({
+              title: 'Error!',
+              text: error.response.data.message || 'Failed to update password. Please try again.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+          });
       } else {
-        Swal.fire({
-          title: "Error!",
-          text: "An error occurred. Please try again later.",
-          icon: "error",
-          confirmButtonText: "OK",
-        });
+         
+          Swal.fire({
+              title: 'Error!',
+              text: 'An error occurred. Please try again later.',
+              icon: 'error',
+              confirmButtonText: 'OK'
+          });
       }
-    });
+  });
 }
 
+
 function validateEmail() {
-  const emailField = document.getElementById("currentEmail");
+  const emailField = document.getElementById('currentEmail');
   if (!emailField.value) {
-    showError("currentEmail", "This field is required");
+      showError('currentEmail', 'This field is required');
   } else {
-    clearError("currentEmail");
+      clearError('currentEmail'); 
   }
 }
 
 function validateCurrentPassword() {
-  const passwordField = document.getElementById("currentPassword");
+  const passwordField = document.getElementById('currentPassword');
   if (!passwordField.value) {
-    showError("currentPassword", "This field is required");
+      showError('currentPassword', 'This field is required');
   } else {
-    clearError("currentPassword");
+      clearError('currentPassword');
   }
 }
 
 function validateNewPassword() {
-  const passwordField = document.getElementById("newPassword");
-  const passwordPattern =
-    /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
+  const passwordField = document.getElementById('newPassword');
+  const passwordPattern = /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
 
   if (!passwordField.value) {
-    showError("newPassword", "This field is required");
+      showError('newPassword', 'This field is required');
   } else if (!passwordPattern.test(passwordField.value)) {
-    showError(
-      "newPassword",
-      "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters."
-    );
+      showError('newPassword', 'Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters. hai hoi');
   } else {
-    clearError("newPassword");
+      clearError('newPassword');
   }
 }
 
 function togglePasswordVisibility(fieldId, iconId) {
   const passwordField = document.getElementById(fieldId);
   const icon = document.getElementById(iconId);
-  const isPasswordVisible = passwordField.type === "text";
-
-  passwordField.type = isPasswordVisible ? "password" : "text";
-  icon.classList.toggle("bi-eye", !isPasswordVisible);
-  icon.classList.toggle("bi-eye-slash", isPasswordVisible);
+  const isPasswordVisible = passwordField.type === 'text';
+  
+  passwordField.type = isPasswordVisible ? 'password' : 'text';
+  icon.classList.toggle('bi-eye', !isPasswordVisible);
+  icon.classList.toggle('bi-eye-slash', isPasswordVisible);
 }
 
 function showError(fieldId, message) {
   const field = document.getElementById(fieldId);
-  const existingError = field.parentNode.querySelector(
-    ".form-text.text-danger"
-  );
-
+  const existingError = field.parentNode.querySelector('.form-text.text-danger');
+  
   if (!existingError) {
-    const errorMessage = document.createElement("small");
-    errorMessage.className = "form-text text-danger";
-    errorMessage.innerText = message;
-    field.parentNode.appendChild(errorMessage);
+      const errorMessage = document.createElement('small');
+      errorMessage.className = 'form-text text-danger';
+      errorMessage.innerText = message;
+      field.parentNode.appendChild(errorMessage);
   }
 }
 
 function clearError(fieldId) {
   const field = document.getElementById(fieldId);
-  const existingError = field.parentNode.querySelector(
-    ".form-text.text-danger"
-  );
-
+  const existingError = field.parentNode.querySelector('.form-text.text-danger');
+  
   if (existingError) {
-    existingError.remove();
+      existingError.remove();
   }
 }
 
 function resetValidationMessages() {
-  const errorMessages = document.querySelectorAll(".form-text.text-danger");
-  errorMessages.forEach((msg) => msg.remove());
+  const errorMessages = document.querySelectorAll('.form-text.text-danger');
+  errorMessages.forEach(msg => msg.remove());
 }

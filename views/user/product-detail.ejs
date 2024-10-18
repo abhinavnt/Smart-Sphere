@@ -277,7 +277,7 @@
 			  <div class="col-md-3 col-sm-6 col-12 p-l-15 p-r-15">
 				<div class="card product-card">
 				  <div class="product-image">
-					<img src="/<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.name %>" class="img-fluid">
+					<a href="/product-detail/<%= relatedProduct._id %>"><img src="/<%= relatedProduct.images[0] %>" alt="<%= relatedProduct.name %>" class="img-fluid"></a>	
 				  </div>
 				  <div class="card-body">
 					<a href="/product/<%= relatedProduct._id %>" class="product-name"><%= relatedProduct.name %></a>

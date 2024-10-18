@@ -17,7 +17,7 @@ router.get('/auth/google/callback',
     if(user.isBlocked){
       res.redirect('/login?message=User is Blocked')
     }else{
-      req.session.user=true;
+      req.session.user=req.user
       res.redirect('/'); 
     }
    

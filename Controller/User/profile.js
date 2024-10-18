@@ -19,7 +19,7 @@ const profile = async (req, res) => {
     console.log("ahi");
   
     try {
-      const userId = req.params.id;
+      const userId = req.session.user._id;
   
       const user = await userSchema.findById(userId);
   

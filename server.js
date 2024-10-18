@@ -7,19 +7,23 @@ const connectDB=require("./db/connectDB")
 const bodyParser = require('body-parser')
 const session=require("express-session")
 const User=require('./model/userModel')
-const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const router = express.Router();
 const authRoutes = require('./routes/auth');
 const noCache=require('nocache');
-const flash = require('connect-flash');
+const passport = require('./config/passPort')
+const { handle500Error, handle404Error } = require('./middleware/errorHandling');
 
 
 
 require("dotenv").config()
+
+
 // middlewares for parsing form data
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+
 // //session for admin and user
 app.use(session({
   secret:"SecretKey",
@@ -40,12 +44,6 @@ app.use(express.static(path.join(__dirname, 'uploads')));
 
 
 
-
-
-
-app.use(flash());
-
-
 // // Passport.js setup
 app.use(passport.initialize());
 app.use(passport.session()); 
@@ -53,71 +51,68 @@ app.use(passport.session());
 
 
 // Passport Google OAuth strategy
-passport.use(new GoogleStrategy({
-  clientID: process.env.GOOGLE_CLIENT_ID, 
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
-  callbackURL: 'http://localhost:3000/auth/google/callback' 
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
+// passport.use(new GoogleStrategy({
+//   clientID: process.env.GOOGLE_CLIENT_ID, 
+//   clientSecret: process.env.GOOGLE_CLIENT_SECRET, 
+//   callbackURL: 'http://localhost:3000/auth/google/callback' 
+// }, async (accessToken, refreshToken, profile, done) => {
+//   try {
     
-    let user = await User.findOne({ googleId: profile.id });
+//     let user = await User.findOne({ googleId: profile.id });
 
-    if (!user) {
+//     if (!user) {
       
-      let existingUser = await User.findOne({ email: profile.emails[0].value });
+//       let existingUser = await User.findOne({ email: profile.emails[0].value });
 
-      if (existingUser) {
+//       if (existingUser) {
         
-        return done(null, existingUser); 
-      }
+//         return done(null, existingUser); 
+//       }
 
       
-      user = new User({
-        googleId: profile.id,
-        username: profile.displayName,
-        email: profile.emails[0].value,
-        password: "12345678" 
-      });
-      await user.save();
-    }
+//       user = new User({
+//         googleId: profile.id,
+//         username: profile.displayName,
+//         email: profile.emails[0].value,
+//         password: "12345678" 
+//       });
+//       await user.save();
+//     }
 
     
-    done(null, user);
+//     done(null, user);
 
-  } catch (err) {
-    console.error('Error during Google authentication:', err);
-    return done(err, null); 
-  }
-}));
+//   } catch (err) {
+//     console.error('Error during Google authentication:', err);
+//     return done(err, null); 
+//   }
+// }));
 
 
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
+// passport.serializeUser((user, done) => {
+//   done(null, user.id);
+// });
 
-passport.deserializeUser(async (id, done) => {
-  const user = await User.findById(id);
-  done(null, user);
-});
+// passport.deserializeUser(async (id, done) => {
+//   const user = await User.findById(id);
+//   done(null, user);
+// });
+
+
 
 
 // // Routes
+
 app.use(authRoutes);
 app.use('/admin',adminRoutes)
 app.use('/',userRoutes)
 
 connectDB()
+
+
 // Error-handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack); 
-  res.status(500).render("500", { error: "Internal Server Error" }); 
-});
-
-
-app.use((req, res, next) => {
-  res.status(404).render("404")
-
-});
+app.use(handle500Error);
+app.use(handle404Error);
 
 
 

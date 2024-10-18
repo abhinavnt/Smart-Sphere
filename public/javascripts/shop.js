@@ -46,6 +46,8 @@ async function fetchProducts() {
     return products;
 }
 
+
+//filtering
 function sortProducts(products, sortBy) {
     let sortedProducts;
 
@@ -84,10 +86,10 @@ function sortProducts(products, sortBy) {
 
 function updateProductDisplay(products) {
     const productContainer = document.getElementById('product-container');
-    productContainer.innerHTML = ''; // Clear current products
+    productContainer.innerHTML = ''; 
 
     if (products.length === 0) {
-        productContainer.innerHTML = '<p>No products found.</p>'; // Optional: Show a message if no products match the sort criteria
+        productContainer.innerHTML = '<p>No products found.</p>'; 
         return;
     }
 
@@ -309,5 +311,5 @@ function sortProducts(products, sortBy) {
     sortedProducts.forEach(product => {
         productContainer.appendChild(product);
     });
-    }
+}
 });

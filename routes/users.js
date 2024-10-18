@@ -8,12 +8,17 @@ const ordercontroller=require("../Controller/User/order")
 const searchController=require("../Controller/User/search")
 const shopController=require("../Controller/User/shop")
 const profileController=require("../Controller/User/profile")
+const passport=require("../config/passPort")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
 
 router.get("/login",userAuth.isUserLogged,userController.loadUserLogin)
 router.post("/login",userController.userLoging)
 router.get("/demo",userController.demologin)
+
+
+//-----------------------------------------------------------------googlelogin--------------------------------------------------------------------
+
 
 
 
@@ -32,7 +37,8 @@ router.get("/", userController.renderHome)
 
 //----------------------------------------------------------------product details------------------------------------------------------------------------
 
-router.get("/product-detail/:id",userController.product_detail)
+router.get("/product-detail/:id",shopController.product_detail)
+
 router.get('/logout',userAuth.checkUserSession,userController.logout)
 
 //----------------------------------------------------------------------forgot password----------------------------------------------------------
@@ -44,6 +50,9 @@ router.get("/forgetOtp",userController.forgotOtpRender)
 router.get("/forgotresendotp",userController.forgotResendOTP)
 router.post("/update-password",userController.newpassVerify)
 
+//---------------------------------------------------------------------Reset Password------------------------------------------------------------
+router.patch('/resetPassword/:userId',userController.resetPassword)
+
 
 
 //-------------------------------------------------------shop page---------------------------------------------------------------------------------
@@ -53,7 +62,7 @@ router.get('/shop',shopController.shopRender)
 
 //-------------------------------------------------------profile----------------------------------------------------------------------------------
 
-router.get('/profile/:id',profileController.profile)
+router.get('/profile',profileController.profile)
 router.post('/addAddress/:id',profileController.addAddress)
 router.patch('/editAddress/:id',profileController.editAddress)
 router.delete('/daleteAddress/:id',profileController.deleteAddress)

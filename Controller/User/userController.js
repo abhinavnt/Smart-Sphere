@@ -246,28 +246,7 @@ const renderHome = async (req, res) => {
   }
 };
 
-//product detail page
-const product_detail = async (req, res) => {
-  const id = req.params.id;
-  const product = await ProductsSchema.findById(id).populate("categoryID");
-  const relatedProducts = await ProductsSchema.find({
-    categoryID: product.categoryID,
-    _id: { $ne: product._id },
-  }).limit(4);
-  if (req.session.user) {
-    res.render("user/product-detail", {
-      user: req.session.user,
-      product,
-      relatedProducts,
-    });
-  } else {
-    res.render("user/product-detail", {
-      user: false,
-      product,
-      relatedProducts,
-    });
-  }
-};
+
 
 //logout
 const logout = (req, res) => {
@@ -460,6 +439,39 @@ const newpassVerify = async (req, res) => {
   }
 };
 
+//------------------------------------------------------------------resetpassword------------------------------------------------------------------
+
+const resetPassword = async (req, res) => {
+  const { email, currentPassword, newPassword } = req.body;
+  console.log(email, currentPassword, newPassword);
+  
+
+  try {
+      const user = await userSchema.findOne({ email });
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+      if (!isMatch) {
+          return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      await userSchema.updateOne(
+          { email: email }, 
+          { $set: { password: hashedPassword } } 
+        );
+      return res.status(200).json({ message: 'Password updated successfully' });
+
+  } catch (error) {
+      console.error('Error updating password:', error);
+      return res.status(500).json({ message: 'Server error' });
+}
+};
+
 
 
 
@@ -473,7 +485,6 @@ module.exports = {
   verifyOTP,
   userLoging,
   renderHome,
-  product_detail,
   logout,
   forgotmail,
   forgotpassword,
@@ -483,4 +494,5 @@ module.exports = {
   forgotResendOTP,
   newpassVerify,
   demologin,
+  resetPassword
 };
