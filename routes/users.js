@@ -17,10 +17,6 @@ router.post("/login",userController.userLoging)
 router.get("/demo",userController.demologin)
 
 
-//-----------------------------------------------------------------googlelogin--------------------------------------------------------------------
-
-
-
 
 //----------------------------------------------------------------SigUp------------------------------------------------------------------------
 
@@ -84,8 +80,11 @@ router.post('/checkout/submit/:id',checkoutcontroller.placeOrder)
 router.get('/order/confirmation/:orderId',checkoutcontroller.conformationOrder)
 
 //----------------------------------------------------------------orders------------------------------------------------------------------------------
-router.post('/order/cancel/:orderId',ordercontroller.cancelOrder)
-router.get('/order/details/:orderId',ordercontroller.orderDetails)
+
+//order items rendering is in the profile controller
+
+//cancel product
+router.post('/order/cancel/:orderId/:productId', ordercontroller.cancelProductInOrder);
 
 //-----------------------------------------------------------------search------------------------------------------------------------------------------
 router.get('/search',searchController.search)

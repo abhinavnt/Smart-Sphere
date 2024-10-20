@@ -1,100 +1,47 @@
-//for cancellection
-document.addEventListener("DOMContentLoaded", function () {
-  const cancelOrderButtons = document.querySelectorAll(".cancelOrder");
-  let orderIdToCancel = null;
-  let modal;
-
-  cancelOrderButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-      orderIdToCancel = this.getAttribute("data-id");
-      modal = new bootstrap.Modal(document.getElementById("cancelOrderModal"));
-      modal.show();
-    });
-  });
-
-  document
-    .getElementById("confirmCancelBtn")
-    .addEventListener("click", function () {
-      const reason = document.getElementById("cancellationReason").value.trim();
-
-      if (!reason) {
-        document.getElementById("error-message").style.display = "block";
-        document.getElementById("error-message").innerText =
-          "Please enter a reason for cancellation.";
-        return;
-      }
-
-      axios
-        .post(`/order/cancel/${orderIdToCancel}`, { reason })
-        .then((response) => {
-          modal.hide();
-          Swal.fire("Cancelled!", response.data.message, "success").then(() => {
-            location.reload();
-          });
-        })
-        .catch((error) => {
-          modal.hide();
-          Swal.fire(
-            "Error!",
-            error.response.data.message || "Something went wrong!",
-            "error"
-          );
-        });
-    });
-});
-
-
-
-// show order  details
+// order details view
 document.addEventListener("DOMContentLoaded", function () {
   const viewOrderButtons = document.querySelectorAll(".viewOrder");
 
   viewOrderButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id");
-
-      // Fetch order details using Axios
-      axios
-        .get(`/order/details/${orderId}`)
+      
+      axios.get(`/admin/${orderId}/details`)
         .then((response) => {
           const order = response.data;
+          console.log(order);
+          
 
-          // Populate the modal with order details
-          document.getElementById("orderedDate").innerText = new Date(order.orderedDate).toLocaleDateString('en-IN');
-          document.getElementById("orderTime").innerText = new Date(
-            order.orderedDate
-          ).toLocaleTimeString();
+          
+          document.getElementById("orderedDate").innerText = new Date(order.orderedDate).toLocaleDateString();
           document.getElementById("orderStatus").innerText = order.orderStatus;
-          document.getElementById(
-            "shippingAddress"
-          ).innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address},  ${order.shippingAddress.pincode}`;
+          document.getElementById("orderID").innerText = order.orderid;
+          document.getElementById("shippingAddress").innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address}, ${order.shippingAddress.pincode}`;
 
           const productsContainer = document.getElementById("orderedProducts");
-          productsContainer.innerHTML = ""; // Clear previous content
+          productsContainer.innerHTML = ""; 
 
           order.items.forEach((item) => {
             productsContainer.innerHTML += `
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <img src="/${item.productID.images[0]}" class="card-img-top" alt="${item.productID.name}">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${item.productID.name}</h5>
-                                        <p class="card-text">Price: ₹${item.productID.price}</p>
-                                        <p class="card-text">Quantity: ${item.quantity}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
+              <div class="col-md-4">
+                <div class="card mb-3">
+                 <p class="card-text">Quantity: ${order._id}</p>
+                  <img src="/${item.productID.images[0]}" class="card-img-top" alt="${item.productID.name}">
+                  <div class="card-body">
+                    <h5 class="card-title">${item.productID.name}</h5>
+                    <p class="card-text">Price: ₹${item.productID.price}</p>
+                    <p class="card-text">Quantity: ${item.quantity}</p>
+                    <button class="btn btn-danger" onclick="cancelProduct('${order._id}', '${item.productID._id}')">Cancel Product</button>
+                  </div>
+                </div>
+              </div>
+            `;
           });
 
-          document.getElementById(
-            "totalAmount"
-          ).innerText = `₹${order.totalAmount}`;
+          document.getElementById("totalAmount").innerText = `₹${order.totalAmount}`;
 
-          // Show the modal
-          const modal = new bootstrap.Modal(
-            document.getElementById("orderDetailModal")
-          );
+        
+          const modal = new bootstrap.Modal(document.getElementById("orderDetailModal"));
           modal.show();
         })
         .catch((error) => {
@@ -106,7 +53,115 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+// Function to cancel a specific product
+document.addEventListener("DOMContentLoaded", function () {
+  const cancelProductButtons = document.querySelectorAll(".cancelProduct");
 
+  cancelProductButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-orderid");
+      const productId = this.getAttribute("data-productid");
+
+      
+      Swal.fire({
+        title: 'Cancel Product',
+        text: 'Please select a reason for cancellation:',
+        input: 'select',
+        inputOptions: {
+          'Not needed anymore': 'Not needed anymore',
+          'Found a better price': 'Found a better price',
+          'Ordered by mistake': 'Ordered by mistake',
+          'Product not available': 'Product not available',
+          'Other': 'Other'
+        },
+        inputPlaceholder: 'Select a reason',
+        showCancelButton: true,
+        confirmButtonText: 'Submit',
+        cancelButtonText: 'Cancel',
+        inputValidator: (value) => {
+          if (!value) {
+            return 'You need to select a reason for cancellation!';
+          }
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          const reason = result.value;
+          axios
+            .post(`/order/cancel/${orderId}/${productId}`, { reason })
+            .then((response) => {
+              Swal.fire("Cancelled!", response.data.message, "success").then(() => {
+                location.reload();
+              });
+            })
+            .catch((error) => {
+              Swal.fire("Error!", error.response?.data?.message || "Something went wrong!", "error");
+            });
+        }
+      });
+    });
+  });
+});
+
+
+
+
+//retuern product
+document.addEventListener("DOMContentLoaded", function () {
+  const returnProductButtons = document.querySelectorAll(".returnProduct");
+
+  // Function to handle return product
+  function handleReturnProduct(orderId, productId) {
+    Swal.fire({
+      title: 'Return Product',
+      text: 'Please select a reason for return:',
+      input: 'select',
+      inputOptions: {
+        'Damaged product': 'Damaged product',
+        'Wrong product delivered': 'Wrong product delivered',
+        'Product quality issue': 'Product quality issue',
+        'Other': 'Other'
+      },
+      inputPlaceholder: 'Select a reason',
+      showCancelButton: true,
+      confirmButtonText: 'Submit',
+      cancelButtonText: 'Cancel',
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You need to select a reason for return!';
+        }
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const reason = result.value;
+        axios
+          .post(`/order/return/${orderId}/${productId}`, { reason })
+          .then((response) => {
+            Swal.fire("Returned!", response.data.message, "success").then(() => {
+              location.reload();
+            });
+          })
+          .catch((error) => {
+            Swal.fire("Error!", error.response?.data?.message || "Something went wrong!", "error");
+          });
+      }
+    });
+  }
+
+  // Attach event listener to all returnProduct buttons
+  returnProductButtons.forEach((button) => {
+    button.addEventListener("click", function () {
+      const orderId = this.getAttribute("data-orderid");
+      const productId = this.getAttribute("data-productid");
+      handleReturnProduct(orderId, productId);
+    });
+  });
+});
+
+
+
+
+
+//adress modal
 document.addEventListener("DOMContentLoaded", function () {
   const addressModal = new bootstrap.Modal(
     document.getElementById("addressModal")

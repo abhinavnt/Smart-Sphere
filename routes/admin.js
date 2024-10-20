@@ -49,9 +49,14 @@ router.patch("/products/:id",productImageUpload.array("croppedImage[]", 10),prod
 router.post("/products/:id", productController.isProductListed);
 
 //------------------------------------------------------------------orders---------------------------------------------------------------
+
+//render the orders
 router.get('/orders',orderController.order)
-router.put('/orders/:orderId/status',orderController.changeStatus)
-router.post('/orders/:orderId/approve-cancellation', orderController.approveCancellation)
+//approve cancellation request
+router.post('/orders/:orderId/approve-cancellation/:productId', orderController.approveProductCancellation);
+//change the order status
+router.patch('/orders/:orderId/items/:productId/status',orderController.changeItemStatus);
+//render order details
 router.get('/:orderId/details',orderController.orderDetails)
 
 module.exports = router;

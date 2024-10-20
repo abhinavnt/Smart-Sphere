@@ -12,22 +12,40 @@ require("dotenv").config();
 
 
 
-// to cancel order
-const cancelOrder =  async (req, res) => {
-    const { orderId } = req.params;
-    const { reason } = req.body; 
-
+const cancelProductInOrder = async (req, res) => { 
+    const { orderId, productId } = req.params;
+    const { reason } = req.body;
+    console.log(reason);
+    
     try {
+        
         const order = await orderSchema.findById(orderId);
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
 
-        order.cancellationRequested = true;
-        order.cancellationReason = reason;
+        
+        const item = order.items.find(i => i.productID.toString() === productId);
+        if (!item) {
+            return res.status(404).json({ message: 'Product not found in the order' });
+        }
+
+       
+        if (item.cancelled) {
+            return res.status(400).json({ message: 'Product has already been cancelled' });
+        }
+        if (item.cancellationRequested) {
+            return res.status(400).json({ message: 'Cancellation already requested for this product.' });
+        }
+
+        
+        item.cancellationRequested = true;
+        item.cancellationReason = reason;
+
+        
         await order.save();
 
-        res.status(200).json({ message: 'Cancellation request submitted successfully. Awaiting admin approval.' });
+        res.status(200).json({ message: 'Cancellation request for the product submitted successfully. Awaiting admin approval.' });
     } catch (error) {
         console.error('Error submitting cancellation request:', error);
         res.status(500).json({ message: 'An error occurred while submitting the cancellation request.' });
@@ -36,35 +54,10 @@ const cancelOrder =  async (req, res) => {
 
 
 
-// order details
-
-const orderDetails = async (req, res) => {
-    const { orderId } = req.params;
-
-    try {
-        const order = await orderSchema.findById(orderId).populate('items.productID'); 
-
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
-        }
-
-        res.json({
-            orderedDate: order.createdAt, 
-            orderStatus: order.orderStatus,
-            shippingAddress: order.shippingAddress,
-            items: order.items,
-            totalAmount: order.totalAmount,
-        });
-    } catch (error) {
-        console.error('Error fetching order details:', error);
-        res.status(500).json({ message: 'An error occurred while fetching the order details' });
-}
-}
-
 
 
 
 module.exports={
-    cancelOrder,
-    orderDetails
+    
+    cancelProductInOrder
 }

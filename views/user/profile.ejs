@@ -453,6 +453,9 @@
             </div>
           </div>
 
+
+<!-- order section================================ -->
+
           <div id="orders" class="section hidden">
             <h2>Orders</h2>
 
@@ -469,55 +472,37 @@
               </thead>
               <tbody>
                 <% orders.forEach(order => { %>
-                <tr>
-                  <td>
-                    <%= new Date(order.orderDate).toLocaleDateString('en-US', {
-                    year: 'numeric', month: 'long', day: 'numeric' }) %>
-                  </td>
-
-                  <td>
-                    <div class="product-list">
-                      <% order.items.forEach(item => { %>
-                      <div class="product-info">
-                        <img
-                          src="/<%= item.productID.images[0] %>"
-                          alt="<%= item.productID.name %>"
-                          class="product-image"
-                        />
-                        <span> x <%= item.quantity %></span>
-                      </div>
-                      <% }) %>
-                    </div>
-                  </td>
-                  <td>₹<%= order.totalAmount %></td>
-                  <td><%= order.orderStatus %></td>
-                  <td>
-                    <button
-                      class="btn btn-info btn-sm viewOrder"
-                      data-id="<%= order._id %>"
-                    >
-                      View
-                    </button>
-                    <% if (order.orderStatus !== 'Delivered' &&
-                    order.orderStatus !== 'Cancelled') { %>
-                    <button
-                      class="btn btn-danger btn-sm cancelOrder"
-                      data-id="<%= order._id %>"
-                    >
-                      Cancel Order
-                    </button>
-                    <% } else if (order.orderStatus === 'Delivered') { %>
-                    <button
-                      class="btn btn-danger btn-sm"
-                      data-id="<%= order._id %>"
-                    >
-                      Return Order
-                    </button>
-                    <% } %>
-                  </td>
-                </tr>
+                    <% order.items.forEach(item => { %> <!-- Loop through each item in the order -->
+                        <tr>
+                            <td>
+                                <%= new Date(order.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+                            </td>
+                            <td>
+                                <div class="product-info">
+                                    <img src="/<%= item.productID.images[0] %>" alt="<%= item.productID.name %>" class="product-image" />
+                                    <span> x <%= item.quantity %></span>
+                                </div>
+                            </td>
+                            <td>₹<%= item.price * item.quantity %></td> <!-- Calculate total for that product -->
+                            <td>
+                              <span class="<%= item.Status === 'Cancelled' ? 'text-danger' : 'text-success' %>">
+                                  <%= item.Status %>
+                              </span>
+                          </td>
+                          
+                            <td>
+                                <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View</button>
+                                <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
+                                    <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">Cancel Product</button>
+                                <% }else if(!item.cancelled) { %>
+                                  <button class="btn btn-dark btn-sm returnProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">Return product</button>
+                                  <% } %>
+                            </td>
+                        </tr>
+                    <% }) %>
                 <% }) %>
-              </tbody>
+            </tbody>
+            
             </table>
             <% } else { %>
             <div class="alert alert-info">No orders found.</div>
@@ -603,6 +588,10 @@
                     <!-- White close button -->
                   </div>
                   <div class="modal-body">
+                    <h5 class="mb-3">
+                      Order ID:
+                      <span id="orderID" class="fw-normal"></span>
+                    </h5>
                     <h5 class="mb-3">
                       Ordered Date:
                       <span id="orderedDate" class="fw-normal"></span>

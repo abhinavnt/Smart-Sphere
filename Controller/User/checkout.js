@@ -78,56 +78,51 @@ const checkout = async (req, res) => {
 }
 
 
+
 // to place the order
 const placeOrder =  async (req, res) => {
     try {
         const userId = req.params.id;
         const { selectedAddress, fullName, address, pincode, phone, paymentMethod } = req.body;
-        console.log(selectedAddress, fullName, address, pincode, phone, paymentMethod);
-        
+
         const cart = await CartSchema.findOne({ userId }).populate('items.productId');
-    
+
         if (!cart || cart.items.length === 0) {
             return res.status(400).send('Your cart is empty');
         }
-    
+
         const outOfStockProducts = [];
         const orderItems = [];
-    
-    
+
         for (const item of cart.items) {
             const product = item.productId;
-    
-        
+
             if (product.stock < item.quantity) {
                 outOfStockProducts.push(product.name);
             } else {
-                
                 product.stock -= item.quantity;
-                await product.save(); 
-    
+                await product.save();
+
+                // Store each product separately with an order status
                 orderItems.push({
                     productID: product._id,
                     quantity: item.quantity,
-                    price: item.price
+                    price: item.price,
+                    cancelled: false, // New field for cancellation status
                 });
             }
         }
-    
-        // If any products are out of stock, return an error message
+
         if (outOfStockProducts.length > 0) {
             return res.status(400).json({
-                message: `The following products are out of stock: ${outOfStockProducts.join(', ')}`
+                message: `The following products are out of stock: ${outOfStockProducts.join(', ')}`,
             });
         }
 
-        
         const totalAmount = orderItems.reduce((total, item) => {
             return total + item.quantity * item.price;
         }, 0);
-        console.log("hurr");
-        
-    
+
         const newOrder = new orderSchema({
             userID: userId,
             items: orderItems,
@@ -136,29 +131,26 @@ const placeOrder =  async (req, res) => {
                 fullname: selectedAddress ? fullName : req.body.fullName,
                 address: selectedAddress ? address : req.body.address,
                 pincode: selectedAddress ? pincode : req.body.pincode,
-                phone: selectedAddress ? phone : req.body.phone
+                phone: selectedAddress ? phone : req.body.phone,
             },
             paymentMethod: paymentMethod === 'bankTransfer' ? 'UPI' : 'COD',
-            orderStatus: 'Pending'
+            orderStatus: 'Pending',
         });
-    
-        await newOrder.save();
-    
-       const check = await CartSchema.findOneAndDelete({ userId: userId });
 
-    
+        await newOrder.save();
+        await CartSchema.findOneAndDelete({ userId });
+
         res.json({ orderId: newOrder._id });
-    
+
     } catch (error) {
         console.error('Error saving order:', error);
         res.status(500).send('An error occurred while processing your order');
     }
-    
 }
 
 
-// order conformation
 
+// order conformation
 const conformationOrder = async (req, res) => {
     try {
         const orderId = req.params.orderId;
@@ -194,7 +186,7 @@ const conformationOrder = async (req, res) => {
     
         console.log(orderDetails);
     
-        // Render the confirmation page
+        
         res.render('user/orderConfirmation', {
             user: req.session.user,
             order: orderDetails,

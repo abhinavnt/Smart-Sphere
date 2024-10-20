@@ -17,16 +17,31 @@ const orderSchema = new mongoose.Schema({
             },
             quantity: { 
                 type: Number, 
-                required: true ,
-                min:1
+                required: true,
+                min: 1
             },
             price: { 
                 type: Number, 
                 required: true 
             },
-            
+            cancelled: {  // Field to track if the product is cancelled
+                type: Boolean,
+                default: false
+            },
+            cancellationRequested: {  // New field to track if cancellation is requested
+                type: Boolean,
+                default: false
+            }, cancellationReason: {
+              type: String,
+               default: null
+           },Status: { 
+            type: String, 
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'], 
+            default: 'Processing' 
+        }
         }
     ],
+    
     totalAmount: { 
         type: Number, 
         required: true 
@@ -53,8 +68,8 @@ const orderSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     },
-    cancellationRequested: { type: Boolean, default: false }, 
-    cancellationReason: { type: String, default: null }
+    
+   
 },{timestamps:true});
 
 module.exports = mongoose.model('Order',orderSchema);

@@ -175,26 +175,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-//search
-// document.addEventListener("DOMContentLoaded", function () {
-//   const searchInput = document.getElementById("searchInput");
-//   const categoryTableBody = document.getElementById("categoryTableBody");
-
-//   searchInput.addEventListener("input", function () {
-//       const searchTerm = searchInput.value.toLowerCase(); // Convert search term to lowercase
-//       const rows = categoryTableBody.getElementsByTagName("tr");
-
-//       for (let i = 0; i < rows.length; i++) {
-//           const categoryNameCell = rows[i].getElementsByTagName("td")[0];
-//           if (categoryNameCell) {
-//               const categoryName = categoryNameCell.textContent || categoryNameCell.innerText;
-//               // Convert category name to lowercase for comparison
-//               if (categoryName.toLowerCase().indexOf(searchTerm) > -1) {
-//                   rows[i].style.display = ""; // Show row
-//               } else {
-//                   rows[i].style.display = "none"; // Hide row
-//               }
-//           }
-//       }
-//   });
-// });
