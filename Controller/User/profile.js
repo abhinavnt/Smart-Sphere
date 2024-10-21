@@ -16,29 +16,45 @@ const orderSchema = require("../../model/orderModel");
 
 // to render profile
 const profile = async (req, res) => {
-    console.log("ahi");
-  
-    try {
+  try {
       const userId = req.session.user._id;
-  
       const user = await userSchema.findById(userId);
-  
+
       if (!user) {
-        return res.redirect("/");
+          return res.redirect("/");
       }
+
       const addresses = await addressSchema.find({ user: userId });
+
+      
+      const page = parseInt(req.query.page) || 1; 
+      const limit = 4; 
+      const skip = (page - 1) * limit; 
+
+      const totalOrders = await orderSchema.countDocuments({ userID: userId });
+      const totalPages = Math.ceil(totalOrders / limit); 
+
+      
       const orders = await orderSchema
-        .find({ userID: userId })
-        .populate("items.productID");
-  
-      res.status(200).render("user/profile", { user, addresses, orders });
-    } catch (err) {
+          .find({ userID: userId })
+          .populate("items.productID")
+          .skip(skip)
+          .limit(limit)
+          .sort({_id:-1})
+
+      res.status(200).render("user/profile", { 
+          user, 
+          addresses, 
+          orders, 
+          currentPage: page, 
+          totalPages 
+      });
+  } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .json({ success: false, message: "Failed to fetch user details" });
-    }
-  };
+      res.status(500).json({ success: false, message: "Failed to fetch user details" });
+  }
+};
+
   
   // to add new address
   const addAddress = async (req, res) => {

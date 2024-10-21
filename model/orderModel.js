@@ -24,11 +24,11 @@ const orderSchema = new mongoose.Schema({
                 type: Number, 
                 required: true 
             },
-            cancelled: {  // Field to track if the product is cancelled
+            cancelled: {  
                 type: Boolean,
                 default: false
             },
-            cancellationRequested: {  // New field to track if cancellation is requested
+            cancellationRequested: { 
                 type: Boolean,
                 default: false
             }, cancellationReason: {
@@ -64,6 +64,13 @@ const orderSchema = new mongoose.Schema({
         enum: ['COD', 'UPI'], 
         required: true 
     },
+    paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Success', 'Failed'],
+        default: 'Pending'
+    },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
     orderDate: { 
         type: Date, 
         default: Date.now 

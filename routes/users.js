@@ -17,7 +17,6 @@ router.post("/login",userController.userLoging)
 router.get("/demo",userController.demologin)
 
 
-
 //----------------------------------------------------------------SigUp------------------------------------------------------------------------
 
 router.get('/signUp',userAuth.isUserLogged, userController.loadUserSignup)
@@ -29,7 +28,6 @@ router.post('/verifyotp',userController.verifyOTP)
 //----------------------------------------------------------------Home------------------------------------------------------------------------
 
 router.get("/", userController.renderHome)
-
 
 //----------------------------------------------------------------product details------------------------------------------------------------------------
 
@@ -47,7 +45,7 @@ router.get("/forgotresendotp",userController.forgotResendOTP)
 router.post("/update-password",userController.newpassVerify)
 
 //---------------------------------------------------------------------Reset Password------------------------------------------------------------
-router.patch('/resetPassword/:userId',userController.resetPassword)
+router.patch('/resetPassword/:userId',userAuth.checkUserSession,userController.resetPassword)
 
 
 
@@ -58,33 +56,37 @@ router.get('/shop',shopController.shopRender)
 
 //-------------------------------------------------------profile----------------------------------------------------------------------------------
 
-router.get('/profile',profileController.profile)
-router.post('/addAddress/:id',profileController.addAddress)
-router.patch('/editAddress/:id',profileController.editAddress)
-router.delete('/daleteAddress/:id',profileController.deleteAddress)
-router.patch('/userDetails/:id',profileController.updateDetails)
+router.get('/profile',userAuth.checkUserSession,profileController.profile)
+router.post('/addAddress/:id',userAuth.checkUserSession,profileController.addAddress)
+router.patch('/editAddress/:id',userAuth.checkUserSession,profileController.editAddress)
+router.delete('/daleteAddress/:id',userAuth.checkUserSession,profileController.deleteAddress)
+router.patch('/userDetails/:id',userAuth.checkUserSession,profileController.updateDetails)
 
 //----------------------------------------------------------cart-----------------------------------------------------------------------------------
 
 router.get('/cart',userAuth.checkUserSession,cartController.cart)
-router.post('/cart/add/:id',cartController.addCart)
-router.post('/cart/check-stock/:id',cartController.check_stock)
-router.patch('/cart/remove/:id',cartController.removeCart)
-router.patch('/cart/update/:userId',cartController.updateCart)
+router.post('/cart/add/:id',userAuth.checkUserSession,cartController.addCart)
+router.post('/cart/check-stock/:id',userAuth.checkUserSession,cartController.check_stock)
+router.patch('/cart/remove/:id',userAuth.checkUserSession,cartController.removeCart)
+router.patch('/cart/update/:userId',userAuth.checkUserSession,cartController.updateCart)
 
 // router.get('/cart/items-count/:userId',cartController.cartCount);
 
 //-------------------------------------------------------------checkout-------------------------------------------------------------------------------
 router.get('/checkout/:id',userAuth.checkUserSession,checkoutcontroller.checkout)
-router.post('/checkout/submit/:id',checkoutcontroller.placeOrder)
-router.get('/order/confirmation/:orderId',checkoutcontroller.conformationOrder)
+router.post('/checkout/submit/:id',userAuth.checkUserSession,checkoutcontroller.placeOrder)
+router.get('/order/confirmation/:orderId',userAuth.checkUserSession,checkoutcontroller.conformationOrder)
 
 //----------------------------------------------------------------orders------------------------------------------------------------------------------
 
 //order items rendering is in the profile controller
 
 //cancel product
-router.post('/order/cancel/:orderId/:productId', ordercontroller.cancelProductInOrder);
+router.post('/order/cancel/:orderId/:productId', userAuth.checkUserSession,ordercontroller.cancelProductInOrder);
+
+router.post('/payment/failure/:id',checkoutcontroller.handleRazorpayPayment)
+router.post('/payment/success/:orderId',checkoutcontroller.paymentSucess);
+router.post('/retryPayment/:orderId', checkoutcontroller.retryPayment)
 
 //-----------------------------------------------------------------search------------------------------------------------------------------------------
 router.get('/search',searchController.search)

@@ -456,57 +456,104 @@
 
 <!-- order section================================ -->
 
-          <div id="orders" class="section hidden">
-            <h2>Orders</h2>
+<div id="orders" class="section hidden">
+  <h2>Orders</h2>
 
-            <% if (orders.length > 0) { %>
-            <table class="table table-striped">
-              <thead>
-                <tr>
+  <% if (orders.length > 0) { %>
+      <table class="table table-striped">
+          <thead>
+              <tr>
                   <th>Order Date</th>
                   <th>Products</th>
                   <th>Total Amount</th>
                   <th>Status</th>
                   <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <% orders.forEach(order => { %>
-                    <% order.items.forEach(item => { %> <!-- Loop through each item in the order -->
-                        <tr>
-                            <td>
-                                <%= new Date(order.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
-                            </td>
-                            <td>
-                                <div class="product-info">
-                                    <img src="/<%= item.productID.images[0] %>" alt="<%= item.productID.name %>" class="product-image" />
-                                    <span> x <%= item.quantity %></span>
-                                </div>
-                            </td>
-                            <td>₹<%= item.price * item.quantity %></td> <!-- Calculate total for that product -->
-                            <td>
-                              <span class="<%= item.Status === 'Cancelled' ? 'text-danger' : 'text-success' %>">
-                                  <%= item.Status %>
-                              </span>
+              </tr>
+          </thead>
+          <tbody>
+              <% orders.forEach(order => { %>
+                  <% order.items.forEach(item => { %> <!-- Loop through each item in the order -->
+                      <tr>
+                          <td>
+                              <%= new Date(order.orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %>
                           </td>
-                          
-                            <td>
-                                <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View</button>
+                          <td>
+                              <div class="product-info">
+                                  <img src="/<%= item.productID.images[0] %>" alt="<%= item.productID.name %>" class="product-image" />
+                                  <span> x <%= item.quantity %></span>
+                              </div>
+                          </td>
+                          <td>₹<%= item.price * item.quantity %></td> <!-- Calculate total for that product -->
+                          <td>
+                            <% if (order.paymentStatus === 'Failed') { %>
+                                <span class="text-danger">Payment Failed</span>
+                            <% } else { %>
+                                <span class="<%= item.Status === 'Cancelled' ? 'text-danger' : 'text-success' %>">
+                                    <%= item.Status %>
+                                </span>
+                            <% } %>
+                        </td>
+                        
+                          <td>
+                            
+                              <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View</button>
+
+                              
+                              <% if (order.paymentStatus === 'Failed') { %>
+                                <!-- Show Retry Payment button if payment failed -->
+                                <button class="btn btn-warning btn-sm retryPayment" data-id="<%= order._id %>">
+                                    Retry Payment
+                                </button>
+                            <% } else { %>
+                                <!-- Show Cancel or Return button based on conditions if payment was successful -->
                                 <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
-                                    <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">Cancel Product</button>
-                                <% }else if(!item.cancelled) { %>
-                                  <button class="btn btn-dark btn-sm returnProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">Return product</button>
-                                  <% } %>
-                            </td>
-                        </tr>
-                    <% }) %>
-                <% }) %>
-            </tbody>
-            
-            </table>
-            <% } else { %>
-            <div class="alert alert-info">No orders found.</div>
-            <% } %>
+                                    <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
+                                        Cancel Product
+                                    </button>
+                                <% } else if (!item.cancelled && item.Status === 'Delivered') { %>
+                                    <button class="btn btn-dark btn-sm returnProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
+                                        Return Product
+                                    </button>
+                                <% } %>
+                            <% } %>
+                          </td>
+                      </tr>
+                  <% }) %>
+              <% }) %>
+          </tbody>
+      </table>
+
+      <!-- Pagination Controls -->
+      <nav aria-label="Page navigation">
+          <ul class="pagination">
+              <% if (currentPage > 1) { %>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage - 1 %>" aria-label="Previous">
+                          <span aria-hidden="true">&laquo;</span>
+                      </a>
+                  </li>
+              <% } %>
+
+              <% for (let i = 1; i <= totalPages; i++) { %>
+                  <li class="page-item <%= i === currentPage ? 'active' : '' %>">
+                      <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                  </li>
+              <% } %>
+
+              <% if (currentPage < totalPages) { %>
+                  <li class="page-item">
+                      <a class="page-link" href="?page=<%= currentPage + 1 %>" aria-label="Next">
+                          <span aria-hidden="true">&raquo;</span>
+                      </a>
+                  </li>
+              <% } %>
+          </ul>
+      </nav>
+  <% } else { %>
+      <div class="alert alert-info">No orders found.</div>
+  <% } %>
+</div>
+
 
             <!-- Cancellation Reason Modal -->
             <div
@@ -759,6 +806,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script>
       $(document).ready(function () {
@@ -801,6 +849,89 @@
         function populateWishlist() {}
       });
     </script>
+
+     <!-- retryPayment -->
+
+     <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const retryButtons = document.querySelectorAll('.retryPayment');
+    
+        retryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const orderId = this.getAttribute('data-id');
+                
+                // Fetch Razorpay Order ID and retry payment
+                axios.post(`/retryPayment/${orderId}`)
+                    .then(response => {
+                      console.log(response.data);
+                      
+                        const { razorpayOrderId, totalAmount, orderId } = response.data;
+    
+                        // Proceed to Razorpay payment
+                        const options = {
+                            key: 'rzp_test_dC0qiQ7NV9kpms', // Your Razorpay test key
+                            amount: totalAmount * 100, // Amount in paise
+                            currency: 'INR',
+                            name: 'SmartSphere',
+                            description: 'Retry Payment',
+                            order_id: razorpayOrderId, // The same Razorpay order ID
+                            handler: function (paymentResponse) {
+                                // Payment success, update backend
+                                axios.post(`/payment/success/${orderId}`, {
+                                    paymentId: paymentResponse.razorpay_payment_id
+                                }).then(() => {
+                                    alert('Payment successful! Payment ID: ' + paymentResponse.razorpay_payment_id);
+                                    window.location.href = `/order/confirmation/${orderId}`;
+                                }).catch(err => {
+                                    console.error('Error updating payment status:', err);
+                                });
+                            },
+                            prefill: {
+                                name: 'User Name',  // Prefill with real data if available
+                                email: 'email@example.com',
+                                contact: '1234567890'
+                            },
+                            theme: {
+                                color: '#F37254'
+                            }
+                        };
+    
+                        const rzp1 = new Razorpay(options);
+    
+                        // Handle Razorpay payment failed event
+                        rzp1.on('payment.failed', function (response) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Payment Failed',
+                                text: 'Your payment failed. Please try again.'
+                            });
+    
+                            // Update backend on payment failure
+                            axios.post(`/payment/failure/${orderId}`, {
+                                paymentId: response.error.metadata.payment_id
+                            }).then(() => {
+                                window.location.href = `/profile`;
+                            }).catch(err => {
+                                console.error('Error logging payment failure:', err);
+                            });
+                        });
+    
+                        // Open Razorpay modal for payment retry
+                        rzp1.open();
+                    })
+                    .catch(err => {
+                        console.error('Error retrying payment:', err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Unable to retry payment at this time.'
+                        });
+                    });
+            });
+        });
+    });
+    
+        </script>
 
     <!-- oder -->
 

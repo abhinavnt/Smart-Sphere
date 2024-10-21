@@ -7,10 +7,15 @@ const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
 const CartSchema=require("../../model/cartModel")
+const Razorpay = require('razorpay');
 const saltRound = 10;
 require("dotenv").config();
 
 
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_dC0qiQ7NV9kpms',
+    key_secret: 'lNbFwodNBJLZyZe6rXMinYJr'
+});
 
 
 
@@ -103,12 +108,12 @@ const placeOrder =  async (req, res) => {
                 product.stock -= item.quantity;
                 await product.save();
 
-                // Store each product separately with an order status
+                
                 orderItems.push({
                     productID: product._id,
                     quantity: item.quantity,
                     price: item.price,
-                    cancelled: false, // New field for cancellation status
+                    cancelled: false, 
                 });
             }
         }
@@ -135,18 +140,43 @@ const placeOrder =  async (req, res) => {
             },
             paymentMethod: paymentMethod === 'bankTransfer' ? 'UPI' : 'COD',
             orderStatus: 'Pending',
+            paymentStatus: paymentMethod === 'bankTransfer' ? 'Failed' : 'Pending'
         });
 
-        await newOrder.save();
-        await CartSchema.findOneAndDelete({ userId });
+        if (paymentMethod === 'bankTransfer') {
+            // Handle UPI (bankTransfer) payment method
+            try {
+                const razorpayOrder = await razorpay.orders.create({
+                    amount: totalAmount * 100, // Convert to paise
+                    currency: 'INR',
+                    receipt: `receipt_${newOrder._id}`
+                });
 
-        res.json({ orderId: newOrder._id });
+                newOrder.razorpayOrderId = razorpayOrder.id; 
+                await newOrder.save();
+                await CartSchema.findOneAndDelete({ userId: userId });
+
+                
+                res.json({ orderId: newOrder._id, razorpayOrderId: razorpayOrder.id, totalAmount });
+
+            } catch (error) {
+                newOrder.paymentStatus = 'Failed'; 
+                await newOrder.save();
+                await CartSchema.findOneAndDelete({ userId: userId });
+                res.status(500).json({ message: 'Payment failed. Please try again.', orderId: newOrder._id });
+            }
+        } else {
+            // Handle COD orders
+            await newOrder.save();
+            await CartSchema.findOneAndDelete({ userId: userId }); 
+            res.json({ orderId: newOrder._id });
+        }
 
     } catch (error) {
         console.error('Error saving order:', error);
         res.status(500).send('An error occurred while processing your order');
     }
-}
+};
 
 
 
@@ -200,6 +230,80 @@ const conformationOrder = async (req, res) => {
 }
 
 
+// Function to handle Razorpay payment
+const handleRazorpayPayment = async (req, res) => {
+    try {
+        console.log("hai njan ivide ethiii ");
+        
+        const { id } = req.params;
+        const {orderId}=req.body
+        console.log("gaihouijejwhs",id);
+        
+        const order = await orderSchema.findOne({ razorpayOrderId: orderId });
+        console.log("hai",order)
+        
+        if (order) {
+            order.paymentStatus = 'Failed';
+            console.log( order.paymentStatus);
+            
+            order.razorpayPaymentId = req.body.paymentId; // Handle the failure payload
+
+            await order.save();
+            return res.status(200).json({ message: 'Payment failure handled successfully.' });
+        }
+
+        
+    } catch (error) {
+        console.error('Error handling Razorpay payment failure:', error);
+        res.status(500).json({ message: 'Server error.' });
+    }
+}
+
+
+const paymentSucess =async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { paymentId } = req.body;
+
+        // Find the order and update the payment status to 'Success'
+        await orderSchema.findByIdAndUpdate(orderId, { paymentStatus: 'Success' });
+
+        res.status(200).json({ message: 'Payment successful', paymentId });
+    } catch (error) {
+        console.error('Error updating payment status:', error);
+        res.status(500).send('Error updating payment status');
+    }
+}
+
+
+const retryPayment=async (req, res) => {
+    console.log("endhlla viswshem");
+    try {
+        const { orderId } = req.params;
+        console.log(orderId);
+        
+        
+        // Find the order by orderId
+        const order = await orderSchema.findById(orderId);
+        console.log(order);
+        console.log(order.paymentStatus);
+        
+
+        if ( order.paymentStatus === 'Success') {
+            return res.status(400).json({ message: 'Cannot retry payment for this order.' });
+        }
+
+        // Send the razorpayOrderId to the frontend for retry
+        res.json({
+            razorpayOrderId: order.razorpayOrderId,
+            totalAmount: order.totalAmount,
+            orderId: order._id
+        });
+    } catch (error) {
+        console.error('Error processing retry payment:', error);
+        res.status(500).json({ message: 'Server error while retrying payment.' });
+    }
+}
 
 
 
@@ -208,7 +312,10 @@ const conformationOrder = async (req, res) => {
 module.exports={
     checkout,
     placeOrder,
-    conformationOrder
+    conformationOrder,
+    retryPayment,
+    paymentSucess,
+    handleRazorpayPayment
 
 
 }
