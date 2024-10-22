@@ -8,6 +8,7 @@ const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
 const CartSchema=require("../../model/cartModel")
 const Razorpay = require('razorpay');
+const offerSchema=require("../../model/offerModel")
 const saltRound = 10;
 require("dotenv").config();
 
@@ -27,8 +28,9 @@ const checkout = async (req, res) => {
 
     const addresses = await addressSchema.find({ user: userId });
 
+    // Fetch cart items and populate product details
     const cartItems = await CartSchema.find({ userId }).populate('items.productId');
-    
+
     if (!cartItems || cartItems.length === 0) {
         return res.render('user/checkout', {
             user: req.session.user,
@@ -42,33 +44,62 @@ const checkout = async (req, res) => {
     }
 
     let cartSubtotal = 0;
-    let discount = 0.5; 
+    let discount = 0; 
     let deliveryFee = 50; 
+    const populatedCartItems = [];
 
+    for (const cart of cartItems) {
+        for (const item of cart.items) {
+            const product = item.productId;
 
+            if (!product) {
+                console.log("Error: Product not found for item:", item);
+                continue;
+            }
 
-    const populatedCartItems = cartItems.flatMap(cart => {
-        return cart.items.map(item => {
-            const product = item.productId; 
+            // Fetch applicable offers
+            const productOffers = await offerSchema.find({
+                isActive: true,
+                targetType: 'Product',
+                selectedProducts: product._id
+            });
 
-            const totalPriceForItem = item.quantity * product.price;
-            cartSubtotal += totalPriceForItem; 
+            const categoryOffers = await offerSchema.find({
+                isActive: true,
+                targetType: 'Category',
+                selectedCategory: product.categoryID
+            });
 
-            return {
-                productName: product.name, 
-                price: product.price,
+            const regularPrice = product.price;
+            let bestOfferPrice = regularPrice;
+
+            if (productOffers.length > 0) {
+                const productDiscountedPrice = Math.round(regularPrice - (regularPrice * (productOffers[0].discountAmount / 100)));
+                bestOfferPrice = Math.min(bestOfferPrice, productDiscountedPrice);
+            }
+
+            if (categoryOffers.length > 0) {
+                const categoryDiscountedPrice = Math.round(regularPrice - (regularPrice * (categoryOffers[0].discountAmount / 100)));
+                bestOfferPrice = Math.min(bestOfferPrice, categoryDiscountedPrice);
+            }
+
+            const totalPriceForItem = item.quantity * bestOfferPrice;
+            cartSubtotal += totalPriceForItem;
+
+            populatedCartItems.push({
+                productName: product.name,
+                price: bestOfferPrice, 
                 quantity: item.quantity,
-                imageUrl: item.imageUrl, 
+                imageUrl: item.imageUrl,
                 totalPrice: totalPriceForItem
-            };
-        });
-    });
+            });
+        }
+    }
 
-   
+    // Use cartSubtotal directly
     let total = cartSubtotal - discount + deliveryFee;
 
     console.log(populatedCartItems);
-
 
     res.render('user/checkout', {
         user: req.session.user,
@@ -78,14 +109,15 @@ const checkout = async (req, res) => {
         discount, 
         deliveryFee, 
         total
-});
+    });
+};
 
-}
+
 
 
 
 // to place the order
-const placeOrder =  async (req, res) => {
+const placeOrder = async (req, res) => {
     try {
         const userId = req.params.id;
         const { selectedAddress, fullName, address, pincode, phone, paymentMethod } = req.body;
@@ -98,6 +130,7 @@ const placeOrder =  async (req, res) => {
 
         const outOfStockProducts = [];
         const orderItems = [];
+        const deliveryFee = 50; // Add delivery fee here
 
         for (const item of cart.items) {
             const product = item.productId;
@@ -108,12 +141,11 @@ const placeOrder =  async (req, res) => {
                 product.stock -= item.quantity;
                 await product.save();
 
-                
                 orderItems.push({
                     productID: product._id,
                     quantity: item.quantity,
                     price: item.price,
-                    cancelled: false, 
+                    cancelled: false,
                 });
             }
         }
@@ -124,9 +156,10 @@ const placeOrder =  async (req, res) => {
             });
         }
 
+        // Calculate totalAmount including deliveryFee
         const totalAmount = orderItems.reduce((total, item) => {
             return total + item.quantity * item.price;
-        }, 0);
+        }, 0) + deliveryFee; // Add delivery fee to the total amount
 
         const newOrder = new orderSchema({
             userID: userId,
@@ -144,7 +177,6 @@ const placeOrder =  async (req, res) => {
         });
 
         if (paymentMethod === 'bankTransfer') {
-            // Handle UPI (bankTransfer) payment method
             try {
                 const razorpayOrder = await razorpay.orders.create({
                     amount: totalAmount * 100, // Convert to paise
@@ -152,15 +184,14 @@ const placeOrder =  async (req, res) => {
                     receipt: `receipt_${newOrder._id}`
                 });
 
-                newOrder.razorpayOrderId = razorpayOrder.id; 
+                newOrder.razorpayOrderId = razorpayOrder.id;
                 await newOrder.save();
                 await CartSchema.findOneAndDelete({ userId: userId });
 
-                
                 res.json({ orderId: newOrder._id, razorpayOrderId: razorpayOrder.id, totalAmount });
 
             } catch (error) {
-                newOrder.paymentStatus = 'Failed'; 
+                newOrder.paymentStatus = 'Failed';
                 await newOrder.save();
                 await CartSchema.findOneAndDelete({ userId: userId });
                 res.status(500).json({ message: 'Payment failed. Please try again.', orderId: newOrder._id });
@@ -168,7 +199,7 @@ const placeOrder =  async (req, res) => {
         } else {
             // Handle COD orders
             await newOrder.save();
-            await CartSchema.findOneAndDelete({ userId: userId }); 
+            await CartSchema.findOneAndDelete({ userId: userId });
             res.json({ orderId: newOrder._id });
         }
 
@@ -177,6 +208,7 @@ const placeOrder =  async (req, res) => {
         res.status(500).send('An error occurred while processing your order');
     }
 };
+
 
 
 

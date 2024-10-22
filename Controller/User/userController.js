@@ -6,6 +6,7 @@ const categorySchema = require("../../model/category");
 const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
+const offerSchema=require("../../model/offerModel")
 const saltRound = 10;
 require("dotenv").config();
 
@@ -236,16 +237,68 @@ const verifyOTP = (req, res) => {
 //home page render
 const renderHome = async (req, res) => {
   const categories = await categorySchema.find({ isListed: true });
-  const products = await ProductsSchema.find({ isListed: true })
+  const products2 = await ProductsSchema.find({ isListed: true })
     .limit(12)
     .populate("categoryID");
+   
+    const productOffers = await offerSchema.find({
+      isActive: true,
+      targetType: 'Product',
+      selectedProducts: { $in: products2.map(p => p._id) }
+  }).populate('selectedProducts');
+   
+  const categoryIDs = products2.map(p => p.categoryID); 
+
+  const categoryOffers = await offerSchema.find({
+      isActive: true,
+      targetType: 'Category',
+      selectedCategory: { $in: categoryIDs }
+  }).populate('selectedCategory');
+  
+  
+    const products = products2.map(product => {
+        const productOffer = productOffers.find(offer => 
+            offer.selectedProducts.some(selectedId => selectedId.equals(product._id))
+        );
+  
+        const categoryOffer = categoryOffers.find(offer => 
+            offer.selectedCategory.some(selectedCat => selectedCat.equals(product.categoryID))
+        );
+  
+        const originalPrice = product.price;
+        let discountedPrice = originalPrice; 
+  
+        if (productOffer) {
+            discountedPrice = Math.round(originalPrice - (originalPrice * (productOffer.discountAmount / 100)));
+        } else if (categoryOffer) {
+            discountedPrice = Math.round(originalPrice - (originalPrice * (categoryOffer.discountAmount / 100)));
+        }
+  
+        return {
+            _id: product._id,
+            name: product.name,
+            price: originalPrice,
+            description: product.description,
+            images: product.images,
+            stock: product.stock,
+            colors: product.colors,
+            rating: product.rating,
+            category: product.categoryID ? product.categoryID.name : 'Unknown',
+            offer: discountedPrice < originalPrice ? {
+                discountedPrice,
+                hasOffer: true
+            } : { hasOffer: false }
+        };
+    });
+  
+
+
   if (req.session.user) {
     res.render("user/home", { user: req.session.user, categories, products });
   } else {
     res.render("user/home", { user: false, categories, products });
   }
 };
-
 
 
 //logout

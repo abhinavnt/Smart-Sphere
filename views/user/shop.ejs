@@ -254,7 +254,14 @@
                                 <span class="star <%= i <= product.rating ? 'filled' : '' %>">&#9733;</span>
                             <% } %>
                         </div>
-                        <p class="card-text">₹<%= product.price %></p>
+                        <p class="card-text">
+                            <% if (product.offer.hasOffer) { %>
+                                <span style="text-decoration: line-through; color: red;">₹<%= product.price %></span>
+                                <span style="color: rgb(12, 13, 12);"> ₹<%= product.offer.discountedPrice %></span>
+                            <% } else { %>
+                                ₹<%= product.price %>
+                            <% } %>
+                        </p>
                         
                     </div>
                     <div class="card-footer d-flex justify-content-between bg-transparent border-top-0">
@@ -266,7 +273,7 @@
                                 data-image="<%= product.images[0] %>" 
                                 data-id="<%= product._id %>" 
                                 data-name="<%= product.name %>" 
-                                data-price="<%= product.price %>">
+                                data-price="<%= product.offer.hasOffer ? product.offer.discountedPrice : (product.categoryOffer && product.categoryOffer.hasOffer ? product.categoryOffer.discountedPrice : product.price) %>">
                                 <i class="bi bi-cart"></i> Add to Cart
                             </button>
                         <% } else { %>

@@ -18,7 +18,7 @@ const { logout } = require("../User/userController");
 const adminCategory = async (req, res) => {
     const message = req.query.message;
     const perPage = 5;
-    const page = parseInt(req.query.page, 10) || 1; // Ensure page is an integer
+    const page = parseInt(req.query.page, 10) || 1; 
   
     try {
       const categories = await categorySchema
@@ -67,7 +67,7 @@ const adminCategory = async (req, res) => {
   const isCategorylist = async (req, res) => {
     try {
       const categoryId = req.params.id;
-      const { isListed } = req.body; // Grab isListed from the body
+      const { isListed } = req.body; 
   
       const category = await categorySchema.findById(categoryId);
       if (!category) {
@@ -76,8 +76,8 @@ const adminCategory = async (req, res) => {
           .json({ success: false, message: "Category does not exist" });
       }
   
-      // Toggle the category's isListed status
-      category.isListed = isListed; // Set it based on the request body
+      
+      category.isListed = isListed; 
       await category.save();
   
       res.status(200).json({
@@ -96,11 +96,11 @@ const adminCategory = async (req, res) => {
   
   //admin category editing
   const adminCategoryEdit = async (req, res) => {
-    const { id } = req.params; // Get category ID from route parameters
-    const { categoryName } = req.body; // Get the new category name from the form submission
+    const { id } = req.params; 
+    const { categoryName } = req.body; 
   
     try {
-      // Find the category by ID
+     
       const category = await categorySchema.findById(id);
       if (!category) {
         return res
@@ -108,7 +108,7 @@ const adminCategory = async (req, res) => {
           .json({ success: true, message: "Category not found" });
       }
   
-      // Check if the new category name already exists in the database
+      
       const existingCategory = await categorySchema.findOne({ categoryName });
       if (existingCategory) {
         return res
@@ -116,7 +116,7 @@ const adminCategory = async (req, res) => {
           .json({ success: true, message: "Category name already exists" });
       }
   
-      // Update the category name
+      
       category.categoryName = categoryName;
       await category.save();
       res.status(200).json({ success: true });

@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema({
     price: { type: Number, required: true },
     colors: [String],
     images: [String], 
-    isListed: { type: Boolean, required: true, default: true }, // Array of base64 strings for cropped images
+    isListed: { type: Boolean, required: true, default: true },
 },{ timestamps: true });
 
 const ProductsSchema = mongoose.model('Product', productSchema);

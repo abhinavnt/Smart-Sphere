@@ -249,8 +249,13 @@
                       
                             <!-- Product Price -->
                             <p class="card-text">
-                              <span class="stext-105 cl3">₹<%= product.price %></span>
-                            </p>
+								<% if (product.offer.hasOffer) { %>
+									<span style="color: red; text-decoration: line-through;">₹<%= product.price %></span>
+									<span style="color: rgb(9, 9, 9);"> ₹<%= product.offer.discountedPrice %></span>
+								<% } else { %>
+									<span>₹<%= product.price %></span>
+								<% } %>
+							</p>
                       
                             <!-- Product Colors -->
                             <div class="colors d-flex mb-3">
@@ -269,7 +274,7 @@
 										data-image="<%= product.images[0] %>" 
 										data-id="<%= product._id %>" 
 										data-name="<%= product.name %>" 
-										data-price="<%= product.price %>">
+										data-price="<%= product.offer.hasOffer ? product.offer.discountedPrice : product.price %>">
 										<i class="bi bi-cart"></i> Add to Cart
 									</button>
 								<% } else { %>
@@ -277,7 +282,7 @@
 										<button class="btn btn-outline-danger btn-sm">
 											<i class="bi bi-heart"></i> Wishlist
 										</button> &nbsp; &nbsp;
-										<button class="btn btn-outline-primary btn-sm">
+										<button class="btn btn-outline-primary btn-sm" >
 											<i class="bi bi-cart"></i> Add to Cart
 										</button>
 									</a>

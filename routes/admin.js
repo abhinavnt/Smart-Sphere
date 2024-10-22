@@ -6,6 +6,7 @@ const productImageUpload = require("../config/multer");
 const orderController=require("../Controller/Admin/orders")
 const categoryController=require("../Controller/Admin/category")
 const productController=require("../Controller/Admin/products")
+const offerController=require("../Controller/Admin/offerController")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
 
@@ -58,5 +59,19 @@ router.post('/orders/:orderId/approve-cancellation/:productId', orderController.
 router.patch('/orders/:orderId/items/:productId/status',orderController.changeItemStatus);
 //render order details
 router.get('/:orderId/details',orderController.orderDetails)
+
+//--------------------------------------------------------------------offers--------------------------------------------------------------------
+router.get('/offer',offerController.offer)
+router.get('/products2',offerController.products)
+router.get('/categories',offerController.categories)
+router.post('/offers/add',offerController.addOffer)
+router.patch('/offers/edit',offerController.editOffer)
+router.patch('/offers/activate',offerController.activate)
+router.patch('/offers/deactivate',offerController.deactivate)
+
+
+
+
+
 
 module.exports = router;

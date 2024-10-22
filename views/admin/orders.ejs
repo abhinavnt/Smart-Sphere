@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orders Page</title>
-    <link rel="stylesheet" href="/css/admin/category.css"> 
+    <!-- <link rel="stylesheet" href="/css/admin/category.css">  -->
     <link rel="stylesheet" href="/css/admin/admin.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" >
 
     <style>
        
@@ -26,92 +27,116 @@
   object-fit: cover; /* Prevent image distortion */
   margin-right: 10px; /* Space between image and text */
 }
+.body{
+    background-color: black !important;
+}
     </style>
 
         <!-- Add this line to load Font Awesome -->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
-        <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+        
 
     
     
 </head>
-<body>
+<body class="bg-dark ">
     <!-- Sidebar -->
     <%- include('partials/_sidebar') %>
 
     <!-- Main Content -->
-   <div class="main-content">
-    <%- include('partials/_topBar') %>
-    <h2 class="my-4 text-center">Orders</h2>
-
-    <div class="category-section">
-        <div class="table-responsive">
-            <table class="table table-striped table-bordered">
-                <thead class="thead-light">
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Product</th>
-                        <th>Status</th>
-                        <th>Quantity</th>
-                        <th>Total Price</th>
-                        <th>Payment Method</th>
-                        <th>Date</th>
-                        <th>Action</th>
-                        <th>Order Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% orders.forEach(function(order) { %>
-                        <% order.items.forEach(function(item) { %>
-                        <tr>
-                            <td><%= order._id %></td>
-                            <td><%= order.userID.username %></td>
-                            <td><%= item.productID.name %></td>
-                            <td>
-                                <% if (item.cancelled) { %>
-                                    <span class="badge badge-danger">Cancelled</span>
-                                <% } else if (item.cancellationRequested) { %>
-                                    <span class="badge badge-warning">Cancellation Requested</span>
-                                    <i class="fa fa-exclamation-circle text-primary" style="cursor:pointer;" 
-                                       onclick="showCancellationModal('<%= item.cancellationReason %>', '<%= order._id %>', '<%= item.productID._id %>')"></i>
-                                <% } else { %>
-                                    <span class="badge badge-secondary"><%= item.Status %></span>
-                                <% } %>
-                            </td>
-                            <td><%= item.quantity %></td>
-                            <td>₹<%= item.price * item.quantity %></td>
-                            <td>
-                                <%= order.paymentMethod %> - 
-                                <span style="color: <%= order.paymentStatus === 'Failed' ? 'red' : (order.paymentStatus === 'Success' ? 'green' : 'orange') %>">
-                                    <%= order.paymentStatus %>
-                                </span>
-                            </td>
-                            <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <% if (item.Status !== 'Cancelled') { %>
-                                        <select class="form-control" onchange="changeItemStatus('<%= order._id %>', '<%= item.productID %>', this.value)">
-                                            <option value="Pending" <%= item.Status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                            <option value="Processing" <%= item.Status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                            <option value="Shipped" <%= item.Status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                            <option value="Delivered" <%= item.Status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                            <option value="Cancelled" <%= item.Status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
-                                        </select>
-                                    <% } else { %>
-                                        <span class="text-muted">Cannot Change</span>
-                                    <% } %>
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View Details</button>
-                            </td>
-                        </tr>
-                        <% }); %>
-                    <% }); %>
-                </tbody>
-            </table>
+    <div class="main-content">
+        <%- include('partials/_topBar') %>
+        <h2 class="my-4 text-center">Orders</h2>
+        <div class="d-flex justify-content-between my-3">
+            <input type="text" id="searchInput" class="form-control w-25" placeholder="Search by Order ID or Customer Name">
+            <input type="date" id="startDate" class="form-control w-25 mx-2" placeholder="Start Date">
+            <input type="date" id="endDate" class="form-control w-25" placeholder="End Date">
+            <select id="statusFilter" class="form-select w-25 mx-2">
+                <option value="">Filter by Status</option>
+                <option value="Pending">Pending</option>
+                <option value="Processing">Processing</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+            </select>
+            <select id="paymentFilter" class="form-select w-25 mx-2">
+                <option value="">Filter by Payment Status</option>
+                <option value="Success">Success</option>
+                <option value="Failed">Failed</option>
+                <option value="Pending">Pending</option>
+            </select>
         </div>
+
+        <div class="category-section">
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered table-dark">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Product</th>
+                            <th>Status</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                            <th>Order Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(function(order) { %>
+                            <% order.items.forEach(function(item) { %>
+                            <tr>
+                                <td><%= order._id %></td>
+                                <td><%= order.userID.username %></td>
+                                <td><%= item.productID.name %></td>
+                                <td>
+                                    <% if (item.cancelled) { %>
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    <% } else if (item.cancellationRequested) { %>
+                                        <span class="badge bg-warning">Cancellation Requested</span>
+                                        <i class="fa fa-exclamation-circle text-primary" style="cursor:pointer;" 
+                                           onclick="showCancellationModal('<%= item.cancellationReason %>', '<%= order._id %>', '<%= item.productID._id %>')"></i>
+                                    <% } else { %>
+                                        <span class="badge bg-secondary"><%= item.Status %></span>
+                                    <% } %>
+                                </td>
+                                <td><%= item.quantity %></td>
+                                <td>₹<%= item.price * item.quantity %></td>
+                                <td>
+                                    <%= order.paymentMethod %> - 
+                                    <span class=" 
+                                        <%= order.paymentStatus === 'Failed' ? 'text-danger' : (order.paymentStatus === 'Success' ? 'text-success' : 'text-warning') %>">
+                                        <%= order.paymentStatus %>
+                                    </span>
+                                </td>
+                                
+                                <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <% if (item.Status !== 'Cancelled') { %>
+                                            <select class="form-control" onchange="changeItemStatus('<%= order._id %>', '<%= item.productID %>', this.value)">
+                                                <option value="Pending" <%= item.Status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                <option value="Processing" <%= item.Status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                                <option value="Shipped" <%= item.Status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                <option value="Delivered" <%= item.Status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                <option value="Cancelled" <%= item.Status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                            </select>
+                                        <% } else { %>
+                                            <span class=" text-white ">Cannot Change</span>
+                                        <% } %>
+                                    </div>
+                                </td>
+                                <td>
+                                    <button style="background-color: #f44772;" class="btn viewOrder btn-sm " data-id="<%= order._id %>">View Details</button>
+                                </td>
+                            </tr>
+                            <% }); %>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
 
         <!-- Pagination -->
         <div class="pagination" aria-label="Page navigation">
@@ -187,6 +212,57 @@
     </div>
 <!-- Include SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<!-- filter and search -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const paymentFilter = document.getElementById('paymentFilter');
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    const tableRows = document.querySelectorAll('tbody tr'); // Get all table rows
+
+    // Function to filter rows
+    function filterRows() {
+        const searchValue = searchInput.value.toLowerCase();
+        const selectedStatus = statusFilter.value;
+        const selectedPayment = paymentFilter.value;
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(endDateInput.value);
+        
+        tableRows.forEach(row => {
+            const orderId = row.querySelector('td:nth-child(1)').textContent.toLowerCase();
+            const customerName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+            const orderStatus = row.querySelector('td:nth-child(4) span').textContent.toLowerCase();
+            const paymentStatus = row.querySelector('td:nth-child(7) span').textContent.toLowerCase();
+            const orderDate = new Date(row.querySelector('td:nth-child(8)').textContent);
+
+            // Check if the row matches the search and filter criteria
+            const matchesSearch = orderId.includes(searchValue) || customerName.includes(searchValue);
+            const matchesStatus = selectedStatus === '' || orderStatus === selectedStatus.toLowerCase();
+            const matchesPayment = selectedPayment === '' || paymentStatus === selectedPayment.toLowerCase();
+            const matchesDate = (!isNaN(startDate) && !isNaN(endDate)) ? (orderDate >= startDate && orderDate <= endDate) : true;
+
+            // Show or hide the row based on the conditions
+            if (matchesSearch && matchesStatus && matchesPayment && matchesDate) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Event listeners for search and filter
+    searchInput.addEventListener('input', filterRows);
+    statusFilter.addEventListener('change', filterRows);
+    paymentFilter.addEventListener('change', filterRows);
+    startDateInput.addEventListener('change', filterRows);
+    endDateInput.addEventListener('change', filterRows);
+});
+
+</script>
 
 
 <!-- order js -->

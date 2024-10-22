@@ -28,7 +28,6 @@ if (msg) {
 }
 
 //listing or unlisting
-
 const updateCategoryStatus = async (categoryId, isListed) => {
   const url =` /admin/category/${categoryId}`;
   const data = { isListed: !isListed };
@@ -39,24 +38,35 @@ const updateCategoryStatus = async (categoryId, isListed) => {
       location.reload();
   } catch (error) {
       console.error('Error updating category status:', error);
-    }
+}
 };;
 
 // Add event listeners to buttons for listing/unlisting products
 document.querySelectorAll('.unlist-btn-category, .list-btn-category').forEach(button => {
   button.addEventListener('click', (event) => {
-      const categoryId = event.target.getAttribute('data-category-id'); 
-      const isListed = event.target.classList.contains('unlist-btn-category'); 
+      const categoryId = event.target.getAttribute('data-category-id');
+      const isListed = event.target.classList.contains('unlist-btn-category');
 
       const action = isListed ? 'Unlist' : 'List';
-      const confirmation = confirm(`Are you sure you want to ${action} this category?`);
 
-      if (confirmation) {
-          updateCategoryStatus(categoryId, isListed); 
-      }
+      // SweetAlert modal for confirmation
+      swal({
+          title: `Are you sure you want to ${action} this category?`,
+          text: "Once confirmed, this action will be performed.",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+      }).then((willConfirm) => {
+          if (willConfirm) {
+              // Call the function to update category status after confirmation
+              updateCategoryStatus(categoryId, isListed);
+              swal(`${action}ed!`, `The category has been ${action.toLowerCase()}ed.`, "success");
+          } else {
+              console.log("Action canceled");
+          }
+      });
   });
 });
-
 
 // Modal handling for adding new products
 document.addEventListener("DOMContentLoaded", () => {
@@ -78,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-  
   // Edit category modal handling
   const editButtons = document.querySelectorAll(".edit-btn-category");
   const editCategoryModal = document.getElementById("editCategoryModal");

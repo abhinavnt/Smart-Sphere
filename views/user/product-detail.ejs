@@ -124,9 +124,18 @@
 				  <%= product.name %>
 				</h4>
 	  
-				<span class="mtext-106 cl2">
-				  ₹<%= product.price.toFixed(2) %>
-				</span>
+				<% if (product.offer.hasOffer || (product.categoryOffer && product.categoryOffer.hasOffer)) { %>
+					<span class="mtext-106 cl2" style="text-decoration: line-through; color: red;">
+						₹<%= product.price %>
+					</span>
+					<span class="mtext-106 cl2" style="color: rgb(13, 13, 13);">
+						₹<%= product.offer.hasOffer ? product.offer.discountedPrice : product.categoryOffer.discountedPrice %>
+					</span>
+				<% } else { %>
+					<span class="mtext-106 cl2">
+						₹<%= product.price %>
+					</span>
+				<%}%>
 	  
 				<p class="stext-102 cl3 p-t-23">
 				  <%= product.description %>
@@ -157,7 +166,7 @@
 								data-image="<%= product.images[0] %>" 
 								data-id="<%= product._id %>" 
 								data-name="<%= product.name %>" 
-								data-price="<%= product.price %>">
+								data-price="<%= product.offer.hasOffer ? product.offer.discountedPrice : (product.categoryOffer && product.categoryOffer.hasOffer ? product.categoryOffer.discountedPrice : product.price) %>">
 						  Add to cart
 						</button>
 					  <% } else { %>

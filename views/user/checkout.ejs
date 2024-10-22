@@ -222,7 +222,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
+<!-- orderplacing -->
     <script>
         function populateAddress() {
             var selectedOption = document.getElementById('addressSelect').selectedOptions[0];
@@ -356,8 +356,8 @@ return valid;
         if (paymentMethod === 'bankTransfer' && razorpayOrderId) {
             // Proceed to Razorpay payment
             const options = {
-                key: 'rzp_test_dC0qiQ7NV9kpms', // Replace with your Razorpay test key
-                amount: totalAmount * 100, // amount in paise
+                key: 'rzp_test_dC0qiQ7NV9kpms', 
+                amount: totalAmount * 100, 
                 currency: 'INR',
                 name: 'smartSphere',
                 description: 'Test Transaction',
@@ -367,8 +367,15 @@ return valid;
                     axios.post(`/payment/success/${orderId}`, {
                         paymentId: paymentResponse.razorpay_payment_id
                     }).then(() => {
-                        alert('Payment successful! Payment ID: ' + paymentResponse.razorpay_payment_id);
-                        window.location.href = `/order/confirmation/${orderId}`;
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Placed',
+                            text: 'Payment successful! Your order has been placed.',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            // Redirect to order confirmation after modal is closed
+                            window.location.href = `/order/confirmation/${orderId}`;
+                        });
                     }).catch(err => {
                         console.error('Error updating payment status:', err);
                     });
@@ -405,8 +412,16 @@ return valid;
 
             rzp1.open();
         } else {
-            // For COD, redirect to order confirmation directly
-            window.location.href = `/order/confirmation/${orderId}`;
+            // For COD, show order placed modal before redirecting to confirmation
+            Swal.fire({
+                icon: 'success',
+                title: 'Order Placed',
+                text: 'Your order has been successfully placed.',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Redirect to order confirmation after modal is closed
+                window.location.href = `/order/confirmation/${orderId}`;
+            });
         }
     })
     .catch(error => {
@@ -423,7 +438,6 @@ return valid;
                 text: 'An error occurred while processing your order.',
             });
         }
-    
     });
 
 }})

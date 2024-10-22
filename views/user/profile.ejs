@@ -853,83 +853,90 @@
      <!-- retryPayment -->
 
      <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const retryButtons = document.querySelectorAll('.retryPayment');
-    
-        retryButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const orderId = this.getAttribute('data-id');
-                
-                // Fetch Razorpay Order ID and retry payment
-                axios.post(`/retryPayment/${orderId}`)
-                    .then(response => {
-                      console.log(response.data);
-                      
-                        const { razorpayOrderId, totalAmount, orderId } = response.data;
-    
-                        // Proceed to Razorpay payment
-                        const options = {
-                            key: 'rzp_test_dC0qiQ7NV9kpms', // Your Razorpay test key
-                            amount: totalAmount * 100, // Amount in paise
-                            currency: 'INR',
-                            name: 'SmartSphere',
-                            description: 'Retry Payment',
-                            order_id: razorpayOrderId, // The same Razorpay order ID
-                            handler: function (paymentResponse) {
-                                // Payment success, update backend
-                                axios.post(`/payment/success/${orderId}`, {
-                                    paymentId: paymentResponse.razorpay_payment_id
-                                }).then(() => {
-                                    alert('Payment successful! Payment ID: ' + paymentResponse.razorpay_payment_id);
-                                    window.location.href = `/order/confirmation/${orderId}`;
-                                }).catch(err => {
-                                    console.error('Error updating payment status:', err);
-                                });
-                            },
-                            prefill: {
-                                name: 'User Name',  // Prefill with real data if available
-                                email: 'email@example.com',
-                                contact: '1234567890'
-                            },
-                            theme: {
-                                color: '#F37254'
-                            }
-                        };
-    
-                        const rzp1 = new Razorpay(options);
-    
-                        // Handle Razorpay payment failed event
-                        rzp1.on('payment.failed', function (response) {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Payment Failed',
-                                text: 'Your payment failed. Please try again.'
-                            });
-    
-                            // Update backend on payment failure
-                            axios.post(`/payment/failure/${orderId}`, {
-                                paymentId: response.error.metadata.payment_id
+    document.addEventListener('DOMContentLoaded', function() {
+    const retryButtons = document.querySelectorAll('.retryPayment');
+
+    retryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const orderId = this.getAttribute('data-id');
+            
+            // Fetch Razorpay Order ID and retry payment
+            axios.post(`/retryPayment/${orderId}`)
+                .then(response => {
+                    console.log(response.data);
+                    
+                    const { razorpayOrderId, totalAmount, orderId } = response.data;
+
+                    // Proceed to Razorpay payment
+                    const options = {
+                        key: 'rzp_test_dC0qiQ7NV9kpms', // Your Razorpay test key
+                        amount: totalAmount * 100, // Amount in paise
+                        currency: 'INR',
+                        name: 'SmartSphere',
+                        description: 'Retry Payment',
+                        order_id: razorpayOrderId, // The same Razorpay order ID
+                        handler: function (paymentResponse) {
+                            // Payment success, update backend
+                            axios.post(`/payment/success/${orderId}`, {
+                                paymentId: paymentResponse.razorpay_payment_id
                             }).then(() => {
-                                window.location.href = `/profile`;
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Payment Successful',
+                                    text: `Payment ID: ${paymentResponse.razorpay_payment_id}`,
+                                    confirmButtonText: 'Go to Order Confirmation'
+                                }).then(() => {
+                                    window.location.href = `/order/confirmation/${orderId}`;
+                                });
                             }).catch(err => {
-                                console.error('Error logging payment failure:', err);
+                                console.error('Error updating payment status:', err);
                             });
-                        });
-    
-                        // Open Razorpay modal for payment retry
-                        rzp1.open();
-                    })
-                    .catch(err => {
-                        console.error('Error retrying payment:', err);
+                        },
+                        prefill: {
+                            name: 'User Name',  // Prefill with real data if available
+                            email: 'email@example.com',
+                            contact: '1234567890'
+                        },
+                        theme: {
+                            color: '#F37254'
+                        }
+                    };
+
+                    const rzp1 = new Razorpay(options);
+
+                    // Handle Razorpay payment failed event
+                    rzp1.on('payment.failed', function (response) {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Error',
-                            text: 'Unable to retry payment at this time.'
+                            title: 'Payment Failed',
+                            text: 'Your payment failed. Please try again.'
+                        });
+
+                        // Update backend on payment failure
+                        axios.post(`/payment/failure/${orderId}`, {
+                            paymentId: response.error.metadata.payment_id
+                        }).then(() => {
+                            window.location.href = `/profile`;
+                        }).catch(err => {
+                            console.error('Error logging payment failure:', err);
                         });
                     });
-            });
+
+                    // Open Razorpay modal for payment retry
+                    rzp1.open();
+                })
+                .catch(err => {
+                    console.error('Error retrying payment:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Unable to retry payment at this time.'
+                    });
+                });
         });
     });
+});
+
     
         </script>
 
