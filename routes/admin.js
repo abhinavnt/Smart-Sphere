@@ -7,6 +7,7 @@ const orderController=require("../Controller/Admin/orders")
 const categoryController=require("../Controller/Admin/category")
 const productController=require("../Controller/Admin/products")
 const offerController=require("../Controller/Admin/offerController")
+const couponController=require("../Controller/Admin/couponController")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
 
@@ -69,7 +70,11 @@ router.patch('/offers/edit',offerController.editOffer)
 router.patch('/offers/activate',offerController.activate)
 router.patch('/offers/deactivate',offerController.deactivate)
 
-
+//---------------------------------------------------------------------coupons-----------------------------------------------------------------------
+router.get('/coupons',couponController.coupon);
+router.post('/coupons/add',couponController.addCoupon)
+router.patch('/coupons/edit/:id',couponController.editCoupon)
+router.delete('/coupons/delete/:couponId',couponController.deleteCoupon)
 
 
 

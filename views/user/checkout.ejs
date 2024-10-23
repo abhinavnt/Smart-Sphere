@@ -52,6 +52,10 @@
     .btn-block {
         width: 100%;
     }
+    #applyCouponbtn{
+        background-color: #28a745;
+        color: white;
+    }
 </style>
 
 </style>
@@ -168,7 +172,19 @@
                 </div>
                 <div class="d-flex justify-content-between font-weight-bold mt-2">
                     <span>Total:</span>
-                    <span>₹<%= total %></span>
+                    <span id="total">₹<%= total %></span>
+                </div>
+                <br>
+                <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+                    <div class="flex-w flex-m m-r-20 m-tb-5">
+                        <input id="couponCodeInput" class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" placeholder="Coupon Code">
+                        <div id="applyCouponbtn" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15  trans-04 pointer m-tb-5" onclick="applyCoupon()">
+                            Apply Coupon
+                        </div>
+                    </div>
+                    <div class="error-message" id="couponCodeError"></div>
+                    <div class="success-message" id="couponSuccessMessage"></div>
+                    
                 </div>
             </div>
         </div>
@@ -443,4 +459,52 @@ return valid;
 }})
 
 
+</script>
+
+
+<!-- applyCoupon -->
+<script>
+    async function applyCoupon() {
+        const couponCode = document.getElementById('couponCodeInput').value;
+        
+        if (!couponCode) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Input',
+                text: 'Please enter a coupon code.',
+            });
+            return;
+        }
+
+        try {
+const response = await axios.post('/cart/applyCoupon', { couponCode });
+
+if (response.status === 200 && response.data.newTotal) {
+    console.log(response.data.newTotal);
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: response.data.message,
+    }).then(() => {
+        location.reload();
+    });
+} else {
+    // Handle error message from the server
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: response.data.message || 'An unexpected error occurred.',
+    });
+}
+} catch (error) {
+    // Handle errors thrown by the axios call itself (network errors, etc.)
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'Error applying coupon. Please try again.',
+    });
+}
+
+    }
 </script>

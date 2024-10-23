@@ -76,6 +76,7 @@ router.patch('/cart/update/:userId',userAuth.checkUserSession,cartController.upd
 router.get('/checkout/:id',userAuth.checkUserSession,checkoutcontroller.checkout)
 router.post('/checkout/submit/:id',userAuth.checkUserSession,checkoutcontroller.placeOrder)
 router.get('/order/confirmation/:orderId',userAuth.checkUserSession,checkoutcontroller.conformationOrder)
+router.post('/cart/applyCoupon',checkoutcontroller.applyCoupon)
 
 //----------------------------------------------------------------orders------------------------------------------------------------------------------
 

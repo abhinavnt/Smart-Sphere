@@ -27,7 +27,7 @@ const userLoging = async (req, res) => {
     const user = await userSchema.findOne({ email });
 
     if (!user) {
-      // Return JSON response for "User not found"
+      
       return res.status(400).json({
         success: false,
         message: "User not found",
@@ -35,7 +35,6 @@ const userLoging = async (req, res) => {
     }
 
     if (user.isBlocked) {
-      // Return JSON response for "User is blocked"
       return res.status(403).json({
         success: false,
         message: "User is blocked",
@@ -45,7 +44,6 @@ const userLoging = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      // Return JSON response for "Password incorrect"
       return res.status(401).json({
         success: false,
         message: "Password incorrect",
@@ -59,11 +57,10 @@ const userLoging = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      redirectUrl: "/", // Redirect to home or dashboard
+      redirectUrl: "/", 
     });
   } catch (error) {
     console.log(error);
-    // Return generic error message
     return res.status(500).json({
       success: false,
       message: "Something went wrong, please try again later",

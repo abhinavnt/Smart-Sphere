@@ -17,7 +17,7 @@ require("dotenv").config();
 
 // to rener cart page
 const cart = async (req, res) => {
-  // const user = req.params.id;
+ 
   const user = req.session.user._id
      console.log(user);
    
@@ -59,6 +59,8 @@ const cart = async (req, res) => {
 
   const totalItems = await CartSchema.countDocuments({ userId: user });
   const totalPages = Math.ceil(totalItems / pages);
+
+  const cart = await CartSchema.findOneAndUpdate({ userId: user },{totalPrice:cartTotal},{new:true})
 
   res.render("user/shopingCart", {
     user: req.session.user || null,
@@ -103,7 +105,7 @@ const addCart = async (req, res) => {
 
     const totalRequestedQuantity = currentCartQuantity + quantity;
 
-    // Check if total quantity exceeds stock
+
     if (totalRequestedQuantity > product.stock) {
       return res.status(400).json({
         message: `Only ${product.stock} units are available in stock. You currently have ${currentCartQuantity} in your cart.`,
@@ -142,7 +144,7 @@ const check_stock = async (req, res) => {
     try {
       const productId = req.params.id;
   
-      // Ensure the user is logged in
+      
       if (!req.session || !req.session.user) {
         return res.status(401).json({ message: "User not logged in" });
       }
@@ -164,7 +166,7 @@ const check_stock = async (req, res) => {
           (item) => item.productId.toString() === productId
         );
         if (item) {
-          userQuantity = item.quantity; // Get current quantity in the user's cart
+          userQuantity = item.quantity; 
         }
       }
   
@@ -191,9 +193,9 @@ const check_stock = async (req, res) => {
 // remove from cart
 
 const removeCart = async (req, res) => {
-  const user = req.params.id; // Extract user ID from route parameters
+  const user = req.params.id; 
   const itemId = req.body.itemId;
-  // Extract item ID from request body
+  
   console.log(itemId);
 
   if (
@@ -205,18 +207,18 @@ const removeCart = async (req, res) => {
   }
 
   try {
-    // Find the user's cart
+    
     const cart = await CartSchema.findOne({ userId: user });
     console.log(cart);
 
     if (cart) {
-      // Remove the item from the cart
+      
       cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
 
-      // Save the updated cart
+      
       await cart.save();
 
-      // Send success response
+      
       res
         .status(200)
         .json({ success: true, message: "Item removed from cart" });
