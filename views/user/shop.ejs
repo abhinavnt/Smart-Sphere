@@ -258,6 +258,7 @@
                             <% if (product.offer.hasOffer) { %>
                                 <span style="text-decoration: line-through; color: red;">₹<%= product.price %></span>
                                 <span style="color: rgb(12, 13, 12);"> ₹<%= product.offer.discountedPrice %></span>
+                                <span class="badge bg-danger">Sale</span>
                             <% } else { %>
                                 ₹<%= product.price %>
                             <% } %>
@@ -266,7 +267,7 @@
                     </div>
                     <div class="card-footer d-flex justify-content-between bg-transparent border-top-0">
                         <% if (user) { %>
-                            <button class="btn btn-outline-danger btn-sm">
+                            <button class="btn btn-outline-secondary btn-sm flex-grow-1 me-2" onclick="addToWishlist('<%= product._id %>')">
                                 <i class="bi bi-heart"></i> Wishlist
                             </button>
                             <button class="btn btn-outline-primary btn-sm add-to-cart" 
@@ -474,6 +475,8 @@
 </script>
 <script src="/javascripts/shop.js"></script>
 
+
+<!-- filter -->
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.filter-tope-group button').forEach(button => {
@@ -504,6 +507,32 @@
 
 </script>
 
+	<!-- add to wishlist -->
+	<script>
+		function addToWishlist(productId) {
+			console.log("uhs");
+		axios.post(`/wishlist/add/${productId}`)
+		
+			.then(response => {
+				Swal.fire({
+					title: 'Success!',
+					text: response.data.message || 'Added to wishlist!',
+					icon: 'success',
+					confirmButtonText: 'OK'
+				});
+			})
+			.catch(error => {
+				Swal.fire({
+					title: 'Error!',
+					text: 'Error adding to wishlist. Please try again.',
+					icon: 'error',
+					confirmButtonText: 'OK'
+				});
+				console.error('Error:', error);
+			});
+	}
+	
+	</script>
 
 </body>
 </html>

@@ -225,77 +225,68 @@
 			
                   <div class="row isotope-grid">
                     <% products.forEach(function(product) { %>
-                      <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%= product.category %>">
-                        <!-- Card Container with Shadow -->
-                        <div class="card shadow border-light rounded">
-                          <!-- Product Image -->
-                          <div class="card-img-top block2-pic hov-img0">
-                           <a href="/product-detail/<%= product._id %>"> <img src="/<%= product.images[0] %>" alt="IMG-PRODUCT" class="img-fluid rounded-top"></a>
-                          </div>
-                      
-                          <!-- Card Body -->
-                          <div class="card-body">
-                            <!-- Product Name -->
-                            <h5 class="card-title">
-                              <a href="" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
-                                <%= product.name %>
-                              </a>
-                            </h5>
-                      
-                            <!-- Product Category -->
-                            <p class="card-text">
-                              <span class="stext-105 cl3"><%= product.categoryName %></span>
-                            </p>
-                      
-                            <!-- Product Price -->
-                            <p class="card-text">
-								<% if (product.offer.hasOffer) { %>
-									<span style="color: red; text-decoration: line-through;">₹<%= product.price %></span>
-									<span style="color: rgb(9, 9, 9);"> ₹<%= product.offer.discountedPrice %></span>
-								<% } else { %>
-									<span>₹<%= product.price %></span>
-								<% } %>
-							</p>
-                      
-                            <!-- Product Colors -->
-                            <div class="colors d-flex mb-3">
-                              <% product.colors.forEach(function(color) { %>
-                                <div class="color-dot color-<%= color.toLowerCase() %> mr-2"></div>
-                              <% }); %>
-                            </div>
-                      
-                            <!-- Add to Wishlist and Add to Cart Buttons -->
-                            <div class="card-footer d-flex justify-content-between bg-transparent border-top-0">
-								<% if (user) { %>
-									<button class="btn btn-outline-danger btn-sm">
-										<i class="bi bi-heart"></i> Wishlist
-									</button>
-									<button class="btn btn-outline-primary btn-sm add-to-cart" 
-										data-image="<%= product.images[0] %>" 
-										data-id="<%= product._id %>" 
-										data-name="<%= product.name %>" 
-										data-price="<%= product.offer.hasOffer ? product.offer.discountedPrice : product.price %>">
-										<i class="bi bi-cart"></i> Add to Cart
-									</button>
-								<% } else { %>
-									<a href="/login" class="d-flex align-items-center">
-										<button class="btn btn-outline-danger btn-sm">
-											<i class="bi bi-heart"></i> Wishlist
-										</button> &nbsp; &nbsp;
-										<button class="btn btn-outline-primary btn-sm" >
-											<i class="bi bi-cart"></i> Add to Cart
-										</button>
-									</a>
-								<% } %>
+						<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item <%= product.category %>">
+						  <div class="card product-card h-100 border-0 shadow-sm">
+							<div class="card-img-top position-relative overflow-hidden">
+							  <a href="/product-detail/<%= product._id %>" class="d-block">
+								<img src="/<%= product.images[0] %>" alt="<%= product.name %>" class="img-fluid transition-transform hover-zoom">
+							  </a>
+							  
 							</div>
-                          </div>
-                        </div>
-                      </div>
-                    <% }); %>
+							<div class="card-body p-3 d-flex flex-column">
+							  <h5 class="card-title mb-1">
+								<a href="/product-detail/<%= product._id %>" class="text-dark text-decoration-none hover-primary">
+								  <%= product.name %>
+								</a>
+							  </h5>
+							  <p class="card-text text-muted small mb-2"><%= product.categoryName %></p>
+							  <div class="d-flex justify-content-between align-items-center mb-3">
+								<div class="product-price">
+								  <% if (product.offer.hasOffer) { %>
+									<span class="text-danger me-2">₹<%= product.offer.discountedPrice %></span>
+									<del><small class="text-muted text-decoration-line-through">₹<%= product.price %></small></del>
+										  <span class="badge bg-danger">Sale</span>
+									
+								  <% } else { %>
+									<span class="text-dark">₹<%= product.price %></span>
+								  <% } %>
+								</div>
+								<div class="color-options">
+								  <% product.colors.forEach(function(color) { %>
+									<span class="color-dot bg-<%= color.toLowerCase() %>" title="<%= color %>"></span>
+								  <% }); %>
+								</div>
+							  </div>
+							  <div class="card-footer bg-transparent border-0 mt-auto p-0">
+								<div class="d-flex justify-content-between">
+								  <% if (user) { %>
+									<button class="btn btn-outline-secondary btn-sm flex-grow-1 me-2" onclick="addToWishlist('<%= product._id %>')">
+									  <i class="bi bi-heart"></i> Wishlist
+									</button>
+									<button class="btn btn-primary btn-sm flex-grow-1 add-to-cart"
+									  data-image="<%= product.images[0] %>"
+									  data-id="<%= product._id %>"
+									  data-name="<%= product.name %>"
+									  data-price="<%= product.offer.hasOffer ? product.offer.discountedPrice : product.price %>">
+									  <i class="bi bi-cart"></i> Add to Cart
+									</button>
+								  <% } else { %>
+									<a href="/login" class="btn btn-outline-primary btn-sm w-100">
+									  <i class="bi bi-box-arrow-in-right"></i> Login to Shop
+									</a>
+								  <% } %>
+								</div>
+							  </div>
+							</div>
+						  </div>
+						</div>
+					  <% }); %>
                   </div>
                   
                   
-                  
+                  <style>
+					
+				  </style>
                   
                   
 
@@ -528,7 +519,32 @@ function showSuccessAlert(message) {
 <!--===============================================================================================-->
 	<script src="javascripts/main.js"></script>
 
-
+	<!-- add to wishlist -->
+	<script>
+		function addToWishlist(productId) {
+			console.log("uhs");
+		axios.post(`/wishlist/add/${productId}`)
+		
+			.then(response => {
+				Swal.fire({
+					title: 'Success!',
+					text: response.data.message || 'Added to wishlist!',
+					icon: 'success',
+					confirmButtonText: 'OK'
+				});
+			})
+			.catch(error => {
+				Swal.fire({
+					title: 'Error!',
+					text: 'Error adding to wishlist. Please try again.',
+					icon: 'error',
+					confirmButtonText: 'OK'
+				});
+				console.error('Error:', error);
+			});
+	}
+	
+	</script>
 
 
 </body>

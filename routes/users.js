@@ -8,6 +8,7 @@ const ordercontroller=require("../Controller/User/order")
 const searchController=require("../Controller/User/search")
 const shopController=require("../Controller/User/shop")
 const profileController=require("../Controller/User/profile")
+const wishlistController=require("../Controller/User/wishlistController")
 const passport=require("../config/passPort")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
@@ -91,5 +92,10 @@ router.post('/retryPayment/:orderId', checkoutcontroller.retryPayment)
 
 //-----------------------------------------------------------------search------------------------------------------------------------------------------
 router.get('/search',searchController.search)
+
+//--------------------------------------------------------------------wishlist-----------------------------------------------------------------------
+router.get('/wishlist',wishlistController.wishlist)
+router.post('/wishlist/add/:productId',wishlistController.addWishlist)
+router.delete('/wishlist/remove',wishlistController.removeFromWishlist)
 
 module.exports = router;
