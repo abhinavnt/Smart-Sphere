@@ -9,6 +9,8 @@ const ProductsSchema = require("../../model/productModel");
 const { log } = require("debug/src/node");
 const orderSchema = require("../../model/orderModel");
 const { logout } = require("../User/userController");
+const walletSchema=require("../../model/walletModel");
+
 
 // to render order management
 const order = async (req, res, next) => {
@@ -122,6 +124,22 @@ const approveProductCancellation = async (req, res) => {
     item.cancelled = true;
     item.Status = "Cancelled";
     item.cancellationRequested = false;
+    
+    
+    console.log(item.Status);
+    //to find the product fund
+    const totalAmount=item.price*item.quantity
+    if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
+      item.Status = "Refund";
+      await refundToWallet(order.userID,totalAmount,orderId,productId);
+      console.log(item.Status);
+  }
+
+     await ProductsSchema.findByIdAndUpdate(
+      productId,
+      { $inc: { stock: item.quantity } },
+      { new: true }
+      );
 
     await order.save();
 
@@ -135,6 +153,46 @@ const approveProductCancellation = async (req, res) => {
       .json({ message: "An error occurred while approving the cancellation." });
   }
 };
+
+
+ 
+//refund to wallet
+const refundToWallet = async (userId, amount,orderId,productId) => {
+  try {
+
+
+
+      const wallet = await walletSchema.findOneAndUpdate(
+          { userId },
+          { 
+              $inc: { balance: amount },
+              $push: { 
+                  transactions: { 
+                      type: 'credit', 
+                      amount: amount, 
+                      description: 'Refund for cancelled order' 
+                  } 
+              } 
+          },
+          { new: true, upsert: true } 
+      );
+       
+       
+       await orderSchema.findOneAndUpdate(
+        { _id: orderId, 'items.productID': productId },  // Match orderId and specific productID
+        { $set: { 'items.$.Status': 'Refund' } },  // Update the Status of the matched item
+        { new: true }  // Return the updated document
+      );
+      
+      
+      console.log("hkshdkjhdsfkjhkjfshdkj");
+
+  } catch (error) {
+      console.error('Error processing refund to wallet:', error);
+      throw new Error('Refund to wallet failed');
+  }
+};
+
 
 
 //order details
@@ -166,5 +224,6 @@ module.exports = {
   order,
   approveProductCancellation,
   changeItemStatus,
-  orderDetails
+  orderDetails,
+
 };

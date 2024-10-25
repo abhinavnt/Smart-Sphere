@@ -4,6 +4,7 @@ const categorySchema = require("../../model/category");
 const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
+const walletSchema=require("../../model/walletModel")
 
 
 
@@ -25,7 +26,11 @@ const profile = async (req, res) => {
       }
 
       const addresses = await addressSchema.find({ user: userId });
-
+      
+      const wallet = await walletSchema.findOne({userId }) || { 
+        balance: 0, 
+        transactions: [] 
+    };
       
       const page = parseInt(req.query.page) || 1; 
       const limit = 4; 
@@ -47,7 +52,8 @@ const profile = async (req, res) => {
           addresses, 
           orders, 
           currentPage: page, 
-          totalPages 
+          totalPages ,
+          wallet
       });
   } catch (err) {
       console.error(err);

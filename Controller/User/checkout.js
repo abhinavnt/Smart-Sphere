@@ -173,8 +173,14 @@ const placeOrder = async (req, res) => {
             },
             paymentMethod: paymentMethod === 'bankTransfer' ? 'UPI' : 'COD',
             orderStatus: 'Pending',
+            offerDiscount:sum,
             paymentStatus: paymentMethod === 'bankTransfer' ? 'Failed' : 'Pending'
         });
+
+        if(req.session.couponDiscound){
+            newOrder.couponDiscount=req.session.couponDiscound
+            newOrder.offerDiscount=req.session.couponDiscound
+        }
 
         if (paymentMethod === 'bankTransfer') {
             try {
@@ -339,7 +345,7 @@ const retryPayment=async (req, res) => {
 
 
 const applyCoupon = async (req, res) => {
-    const { couponCode } = req.body;
+    const { couponCode } = req.body;    
     const userId = req.session.user._id;  
     
     try {

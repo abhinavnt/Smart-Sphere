@@ -1,39 +1,38 @@
-
-//offer modal add
+// to add offer
 function openOfferModal() {
-    document.getElementById('offerId').value = ''; // Reset for adding new offer
+    document.getElementById('offerId').value = '';
     document.getElementById('offerName').value = '';
     document.getElementById('discount').value = '';
     document.getElementById('targetType').value = '';
     document.getElementById('startDate').value = '';
     document.getElementById('endDate').value = '';
     document.getElementById('modalTitle').textContent = 'Add Offer';
-    clearCategorySelection(); // Clear previous category selections
-    updateProducts(); 
+    clearCategorySelection();
+    updateProducts();
     document.getElementById('offerModal').style.display = 'block';
 }
 
-//offer modal close
 function closeModal() {
-    document.getElementById('offerModal').style.display = 'none'; 
+    document.getElementById('offerModal').style.display = 'none';
     clearErrors();
 }
 
 function clearErrors() {
-    document.getElementById('offerNameError').innerText = '';
-    document.getElementById('discountError').innerText = '';
-    document.getElementById('targetTypeError').innerText = '';
-    document.getElementById('productSelectError').innerText = '';
-    document.getElementById('categorySelectError').innerText = '';
+    const errorIds = ['offerNameError', 'discountError', 'targetTypeError', 'productSelectError', 'categorySelectError', 'endDateError'];
+    errorIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerText = '';
+        }
+    });
 }
 
 function clearCategorySelection() {
     const categorySelectContainer = document.getElementById('categorySelectContainer');
-    categorySelectContainer.innerHTML = ''; 
-    categorySelectContainer.style.display = 'none'; 
+    categorySelectContainer.innerHTML = '';
+    categorySelectContainer.style.display = 'none';
 }
 
-//offer add form validation
 function validateForm() {
     let isValid = true;
     clearErrors();
@@ -41,8 +40,8 @@ function validateForm() {
     const offerName = document.getElementById('offerName').value;
     const discount = document.getElementById('discount').value;
     const targetType = document.getElementById('targetType').value;
-    const selectedProducts = Array.from(document.querySelectorAll('input[name="productSelect"]:checked')).map(input => input.value);
-    const selectedCategory = Array.from(document.querySelectorAll('input[name="categorySelect"]:checked')).map(input => input.value);
+    const selectedProducts = Array.from(document.querySelectorAll('#productSelect option:checked')).map(option => option.value);
+    const selectedCategory = Array.from(document.querySelectorAll('#categorySelect option:checked')).map(option => option.value);
     
     const startDate = new Date(document.getElementById('startDate').value);
     const endDate = new Date(document.getElementById('endDate').value);
@@ -70,16 +69,19 @@ function validateForm() {
         isValid = false;
     }
 
-    // Check if the end date is before the start date
     if (endDate < startDate) {
         document.getElementById('endDateError').innerText = 'End date cannot be before the start date.';
+        isValid = false;
+    }
+
+    if(discount > 99){
+        document.getElementById('discountError').innerText = 'Discount cannot be more tha 99% .';
         isValid = false;
     }
 
     return isValid;
 }
 
-//offer adding
 document.getElementById('offerForm').onsubmit = function(e) {
     e.preventDefault();
     if (validateForm()) {
@@ -89,14 +91,14 @@ document.getElementById('offerForm').onsubmit = function(e) {
             startDate: document.getElementById('startDate').value,
             endDate: document.getElementById('endDate').value,
             targetType: document.getElementById('targetType').value,
-            selectedProducts: Array.from(document.querySelectorAll('input[name="productSelect"]:checked')).map(input => input.value),
-            selectedCategory: Array.from(document.querySelectorAll('input[name="categorySelect"]:checked')).map(input => input.value) 
+            selectedProducts: Array.from(document.querySelectorAll('#productSelect option:checked')).map(option => option.value),
+            selectedCategory: Array.from(document.querySelectorAll('#categorySelect option:checked')).map(option => option.value)
         };
         console.log(offerData);
         
         axios.post('/admin/offers/add', offerData)
             .then(response => {
-              
+                console.log('Offer saved successfully:', response.data);
                 closeModal();
                 location.reload()
             })
@@ -106,67 +108,67 @@ document.getElementById('offerForm').onsubmit = function(e) {
     }
 };
 
-//offer edit
 function updateProducts() {
     const targetType = document.getElementById('targetType').value;
     const productSelectContainer = document.getElementById('productSelectContainer');
     const categorySelectContainer = document.getElementById('categorySelectContainer');
 
-    productSelectContainer.innerHTML = ''; 
-    categorySelectContainer.innerHTML = '';
-    categorySelectContainer.style.display = 'none'; 
+    productSelectContainer.style.display = 'none';
+    categorySelectContainer.style.display = 'none';
 
     if (targetType) {
-        const url = targetType === 'Category' ? '/admin/categories' : '/admin/products2'; 
+        const url = targetType === 'Category' ? '/admin/categories' : '/admin/products2';
 
-        if (targetType === 'Category') {
-            categorySelectContainer.style.display = 'block'; 
-           
-            axios.get(url)
-                .then(response => {
-                    const categories = response.data; 
-                    categories.forEach(category => {
-                        const radio = document.createElement('input');
-                        radio.type = 'radio'; 
-                        radio.name = 'categorySelect'; 
-                        radio.value = category._id; 
-                        const label = document.createElement('label');
-                        label.textContent = category. categoryName;
+        const selectElement = document.createElement('select');
+        selectElement.id = targetType === 'Category' ? 'categorySelect' : 'productSelect';
+        selectElement.multiple = true; 
+        selectElement.style.width = '100%';
 
-                        categorySelectContainer.appendChild(radio);
-                        categorySelectContainer.appendChild(label);
-                        categorySelectContainer.appendChild(document.createElement('br'));
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
+        (targetType === 'Category' ? categorySelectContainer : productSelectContainer).innerHTML = ''; 
+        (targetType === 'Category' ? categorySelectContainer : productSelectContainer).appendChild(selectElement);
+        (targetType === 'Category' ? categorySelectContainer : productSelectContainer).style.display = 'block'; 
+
+        axios.get(url)
+            .then(response => {
+                const items = response.data; 
+                items.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item._id; 
+                    option.textContent = item.name;
+                    selectElement.appendChild(option);
                 });
-        } else {
-        
-            axios.get(url)
-                .then(response => {
-                    const products = response.data; 
-                    products.forEach(product => {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox'; 
-                        checkbox.name = 'productSelect';
-                        checkbox.value = product._id;
-                        const label = document.createElement('label');
-                        label.textContent = product.name;
 
-                        productSelectContainer.appendChild(checkbox);
-                        productSelectContainer.appendChild(label);
-                        productSelectContainer.appendChild(document.createElement('br'));
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching products:', error);
-                });
-        }
+                addSearchFunctionality(selectElement);
+            })
+            .catch(error => {
+                console.error('Error fetching items:', error);
+            });
     }
 }
 
-//offer edit modal
+function addSearchFunctionality(selectElement) {
+    const searchInput = document.createElement('input');
+    searchInput.placeholder = 'Search...';
+    searchInput.style.width = '100%'; 
+
+    searchInput.addEventListener('input', function() {
+        const filter = searchInput.value.toLowerCase();
+        const options = selectElement.options;
+        for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            option.style.display = option.text.toLowerCase().includes(filter) ? '' : 'none';
+        }
+    });
+
+    selectElement.parentNode.insertBefore(searchInput, selectElement);
+}
+
+
+
+
+// to edit offer
+
+
 function openEditOfferModal(id, title, discount, targetType, startDate, endDate, selectedProducts = [], selectedCategories = []) {
     document.getElementById('editOfferId').value = id; 
     document.getElementById('editOfferName').value = title;
@@ -175,11 +177,11 @@ function openEditOfferModal(id, title, discount, targetType, startDate, endDate,
 
     document.getElementById('editStartDate').value = formatDateToInput(startDate);
     document.getElementById('editEndDate').value = formatDateToInput(endDate);
-    
+
     document.getElementById('editModalTitle').textContent = 'Edit Offer';
 
     updateEditProducts(targetType, selectedProducts, selectedCategories);
-    
+
     document.getElementById('editOfferModal').style.display = 'block';
 }
 
@@ -187,67 +189,67 @@ function formatDateToInput(dateString) {
     const date = new Date(dateString);
     return date.toISOString().split('T')[0];
 }
-//offer edit updateing
+
 function updateEditProducts(targetType, selectedProducts, selectedCategories) {
     const editProductSelectContainer = document.getElementById('editProductSelectContainer');
     const editCategorySelectContainer = document.getElementById('editCategorySelectContainer');
+    const productSelect = document.getElementById('editProductSelect');
+    const categorySelect = document.getElementById('editCategorySelect');
 
-    editProductSelectContainer.innerHTML = ''; 
-    editCategorySelectContainer.innerHTML = ''; 
+    editProductSelectContainer.style.display = 'none';
     editCategorySelectContainer.style.display = 'none';
 
     if (targetType) {
         const url = targetType === 'Category' ? '/admin/categories' : '/admin/products2';
 
         if (targetType === 'Category') {
-            editCategorySelectContainer.style.display = 'block'; 
-            axios.get(url)
-                .then(response => {
-                    const categories = response.data;
-                    categories.forEach(category => {
-                        const radio = document.createElement('input');
-                        radio.type = 'radio';
-                        radio.name = 'editCategorySelect';
-                        radio.value = category._id;
-                        radio.checked = selectedCategories.includes(category._id);
-
-                        const label = document.createElement('label');
-                        label.textContent = category.categoryName;
-
-                        editCategorySelectContainer.appendChild(radio);
-                        editCategorySelectContainer.appendChild(label);
-                        editCategorySelectContainer.appendChild(document.createElement('br'));
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching categories:', error);
-                });
+            editCategorySelectContainer.style.display = 'block';
+            fetchOptions(url, categorySelect, selectedCategories);
         } else {
-            axios.get(url)
-                .then(response => {
-                    const products = response.data;
-                    products.forEach(product => {
-                        const checkbox = document.createElement('input');
-                        checkbox.type = 'checkbox';
-                        checkbox.name = 'editProductSelect';
-                        checkbox.value = product._id;
-                        checkbox.checked = selectedProducts.includes(product._id);
-
-                        const label = document.createElement('label');
-                        label.textContent = product.name;
-
-                        editProductSelectContainer.appendChild(checkbox);
-                        editProductSelectContainer.appendChild(label);
-                        editProductSelectContainer.appendChild(document.createElement('br'));
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching products:', error);
-                });
+            editProductSelectContainer.style.display = 'block';
+            fetchOptions(url, productSelect, selectedProducts);
         }
     }
 }
-//offer edit close modal
+
+function fetchOptions(url, selectElement, selectedValues) {
+    selectElement.innerHTML = ''; 
+
+    if (!selectElement.previousElementSibling || !selectElement.previousElementSibling.classList.contains('search-input')) {
+        const searchInput = document.createElement('input');
+        searchInput.placeholder = 'Search...';
+        searchInput.classList.add('search-input');
+        searchInput.style.width = '100%'; 
+        searchInput.addEventListener('input', function() {
+            const filter = searchInput.value.toLowerCase();
+            const options = selectElement.options;
+            for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                option.style.display = option.text.toLowerCase().includes(filter) ? '' : 'none';
+            }
+        });
+
+        // Insert search input above the select element
+        selectElement.parentNode.insertBefore(searchInput, selectElement);
+    }
+
+    // Fetch the data
+    axios.get(url)
+        .then(response => {
+            const items = response.data;
+            items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item._id; 
+                option.textContent = item.name; 
+                option.selected = selectedValues.includes(item._id);
+                selectElement.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching options:', error);
+        });
+}
+
 function closeEditModal() {
     document.getElementById('editOfferModal').style.display = 'none'; 
     clearEditErrors();
@@ -263,8 +265,8 @@ function clearEditErrors() {
 
 document.getElementById('editTargetType').addEventListener('change', function() {
     const targetType = this.value;
-    const selectedProducts = Array.from(document.querySelectorAll('input[name="editProductSelect"]:checked')).map(input => input.value);
-    const selectedCategories = Array.from(document.querySelectorAll('input[name="editCategorySelect"]:checked')).map(input => input.value);
+    const selectedProducts = Array.from(document.querySelectorAll('#editProductSelect option:checked')).map(option => option.value);
+    const selectedCategories = Array.from(document.querySelectorAll('#editCategorySelect option:checked')).map(option => option.value);
 
     updateEditProducts(targetType, selectedProducts, selectedCategories);
 });
@@ -279,13 +281,14 @@ document.getElementById('editOfferForm').onsubmit = function(e) {
             startDate: document.getElementById('editStartDate').value,
             endDate: document.getElementById('editEndDate').value,
             targetType: document.getElementById('editTargetType').value,
-            selectedProducts: Array.from(document.querySelectorAll('input[name="editProductSelect"]:checked')).map(input => input.value),
-            selectedCategory: Array.from(document.querySelectorAll('input[name="editCategorySelect"]:checked')).map(input => input.value)
+            selectedProducts: Array.from(document.querySelectorAll('#editProductSelect option:checked')).map(option => option.value),
+            selectedCategories: Array.from(document.querySelectorAll('#editCategorySelect option:checked')).map(option => option.value)
         };
 
         axios.patch('/admin/offers/edit', offerData)
             .then(response => {
                 console.log('Offer updated successfully:', response.data);
+                location.reload()
                 closeEditModal();
             })
             .catch(error => {
@@ -294,22 +297,70 @@ document.getElementById('editOfferForm').onsubmit = function(e) {
     }
 };
 
-//offer edit validation
 function validateEditForm() {
-    return true; 
+    let isValid = true;
+    clearEditErrors();
+
+    const offerName = document.getElementById('editOfferName').value;
+    const discount = document.getElementById('editDiscount').value;
+    const targetType = document.getElementById('editTargetType').value;
+
+    if (!offerName || /^[^a-zA-Z0-9]+$/.test(offerName)) {
+        document.getElementById('editOfferNameError').innerText = 'Offer name cannot be empty or contain only special characters.';
+        isValid = false;
+    }
+
+    if (discount < 0) {
+        document.getElementById('editDiscountError').innerText = 'Discount cannot be a negative value.';
+        isValid = false;
+    }
+
+    if (!targetType) {
+        document.getElementById('editTargetTypeError').innerText = 'Please select a target type.';
+        isValid = false;
+    }
+
+    return isValid;
 }
 
-//offer avtive or deavtive
+
+
+
+
 function toggleOfferStatus(id, isActive) {
     const action = isActive ? 'activate' : 'deactivate';
-    
-    const url = `/admin/offers/${action}`;
-    axios.patch(url, { id })
-        .then(response => {
-            console.log(response.data.message);
-            location.reload()
-        })
-        .catch(error => {
-            console.error('Error toggling offer status:', error);
- });
-}
+    const actionText = isActive ? 'Activate' : 'Deactivate';
+
+    Swal.fire({
+        title: `Are you sure you want to ${actionText} this offer?`,
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, proceed!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const url =`/admin/offers/${action}`;
+            axios.patch(url, { id })
+                .then(response => {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.data.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload();
+                    });
+                })
+                .catch(error => {
+                    console.error('Error toggling offer status:', error);
+                    Swal.fire(
+                        'Error!',
+                        'There was an issue changing the offer status.',
+                        'error'
+                    );
+                });
+        }
+       });
+    }
