@@ -85,6 +85,7 @@ router.post('/cart/applyCoupon',checkoutcontroller.applyCoupon)
 
 //cancel product
 router.post('/order/cancel/:orderId/:productId', userAuth.checkUserSession,ordercontroller.cancelProductInOrder);
+router.post('/order/return/:orderId/:productId', ordercontroller.returnProductInOrder);
 
 router.post('/payment/failure/:id',checkoutcontroller.handleRazorpayPayment)
 router.post('/payment/success/:orderId',checkoutcontroller.paymentSucess);

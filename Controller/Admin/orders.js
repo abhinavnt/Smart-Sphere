@@ -155,6 +155,59 @@ const approveProductCancellation = async (req, res) => {
 };
 
 
+
+// Approve Return Request
+const approveProductReturn = async (req, res) => {
+  console.log("here recived");
+  
+  const { orderId, productId } = req.params;
+
+  try {
+      // Find the order
+      const order = await orderSchema.findById(orderId);
+      if (!order) {
+          return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Find the specific product in the order
+      const item = order.items.find(i => i.productID.toString() === productId);
+      if (!item) {
+          return res.status(404).json({ message: "Product not found in the order" });
+      }
+
+      // Check if there is a return request pending
+      if (!item.returnRequested) {
+          return res.status(400).json({ message: "No return request for this product" });
+      }
+
+      // Update return status and handle refund if required
+      item.returned = true;
+      item.Status = "Returned";
+      item.returnRequested = false;
+
+      const totalAmount = item.price * item.quantity;
+      if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
+          item.Status = "Refunded";
+          await refundToWallet(order.userID, totalAmount, orderId, productId);
+      }
+
+      // Update stock quantity
+      await ProductsSchema.findByIdAndUpdate(
+          productId,
+          { $inc: { stock: item.quantity } },
+          { new: true }
+      );
+
+      // Save the order with updated details
+      await order.save();
+
+      res.status(200).json({ message: "Product return approved successfully." });
+  } catch (error) {
+      console.error("Error approving product return:", error);
+      res.status(500).json({ message: "An error occurred while approving the return." });
+  }
+};
+
  
 //refund to wallet
 const refundToWallet = async (userId, amount,orderId,productId) => {
@@ -225,5 +278,6 @@ module.exports = {
   approveProductCancellation,
   changeItemStatus,
   orderDetails,
+  approveProductReturn
 
 };

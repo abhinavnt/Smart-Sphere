@@ -98,6 +98,10 @@
                                         <span class="badge bg-warning">Cancellation Requested</span>
                                         <i class="fa fa-exclamation-circle text-primary" style="cursor:pointer;" 
                                            onclick="showCancellationModal('<%= item.cancellationReason %>', '<%= order._id %>', '<%= item.productID._id %>')"></i>
+                                    <% } else if (item.returnRequested) { %>
+                                        <span class="badge bg-info">Return Requested</span>
+                                        <i class="fa fa-info-circle text-primary" style="cursor:pointer;" 
+                                        onclick="showReturnModal('<%= item.returnReason %>', '<%= order._id %>', '<%= item.productID._id %>')"></i>
                                     <% } else { %>
                                         <span class="badge bg-secondary"><%= item.Status %></span>
                                     <% } %>
@@ -400,6 +404,51 @@ function approveProductCancellation(orderId, productId) {
 
 <!-- Bootstrap JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+   function showReturnModal(returnReason, orderId, productId) {
+    Swal.fire({
+        title: "Return Request",
+        html: `
+            <p>Reason: ${returnReason}</p>
+            <p>Are you sure you want to approve this return request?</p>
+        `,
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#28a745",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Approve Return"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Call the backend API to approve the return
+            approveReturnRequest(orderId, productId);
+        }
+    });
+}
+
+async function approveReturnRequest(orderId, productId) {
+    try {
+        
+        const response = await axios.patch(`/admin/order/approve-return/${orderId}/${productId}`);
+        
+        if (response.status === 200) {
+            // Show success message
+            Swal.fire("Approved!", response.data.message, "success");
+            // Optionally, refresh the page or update the UI
+            location.reload();
+        } else {
+            // Show error message if approval fails
+            Swal.fire("Error!", response.data.message, "error");
+        }
+    } catch (error) {
+        console.error("Error approving return:", error);
+        Swal.fire("Error!", "An error occurred while approving the return.", "error");
+    }
+}
+
+
+  </script>
+
 
 </body>
 </html>

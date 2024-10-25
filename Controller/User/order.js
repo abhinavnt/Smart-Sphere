@@ -54,10 +54,53 @@ const cancelProductInOrder = async (req, res) => {
 
 
 
+// Handle Return Product Request
+const returnProductInOrder = async (req, res) => {
+    const { orderId, productId } = req.params;
+    const { reason } = req.body;
+    
+    try {
+        // Find the order
+        const order = await orderSchema.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        // Find the specific product in the order
+        const item = order.items.find(i => i.productID.toString() === productId);
+        if (!item) {
+            return res.status(404).json({ message: 'Product not found in the order' });
+        }
+
+        // Check if the product has already been returned or if a return request is pending
+        if (item.returned) {
+            return res.status(400).json({ message: 'Product has already been returned' });
+        }
+        if (item.returnRequested) {
+            return res.status(400).json({ message: 'Return already requested for this product.' });
+        }
+
+        // Set return request details
+        item.returnRequested = true;
+        item.returnReason = reason;
+
+        // Save changes
+        await order.save();
+
+        res.status(200).json({ message: 'Return request for the product submitted successfully. Awaiting admin approval.' });
+    } catch (error) {
+        console.error('Error submitting return request:', error);
+        res.status(500).json({ message: 'An error occurred while submitting the return request.' });
+    }
+};
+
+
+
 
 
 
 module.exports={
     
-    cancelProductInOrder
+    cancelProductInOrder,
+    returnProductInOrder
 }

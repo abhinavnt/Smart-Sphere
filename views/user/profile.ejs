@@ -484,38 +484,44 @@
                             <% if (order.paymentStatus === 'Failed') { %>
                                 <span class="text-danger">Payment Failed</span>
                             <% } else if (item.Status === 'Refund') { %>
-                                <span class="text-success">Refund Successful</span>
+                                <span class="text-primary">Refund Successful</span>
                             <% } else { %>
-                                <span class="<%= item.Status === 'Cancelled' ? 'text-danger' : 'text-success' %>">
+                                <span class="<%= item.Status === 'Cancelled' ? 'text-danger' : (item.Status === 'Returned' ? 'text-dark' : 'text-success') %>">
                                     <%= item.Status %>
                                 </span>
                             <% } %>
                         </td>
                         
                         
-                          <td>
-                            
-                              <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View</button>
-
-                              
-                              <% if (order.paymentStatus === 'Failed') { %>
-                                <!-- Show Retry Payment button if payment failed -->
-                                <button class="btn btn-warning btn-sm retryPayment" data-id="<%= order._id %>">
-                                    Retry Payment
-                                </button>
-                            <% } else { %>
-                                <!-- Show Cancel or Return button based on conditions if payment was successful -->
-                                <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
-                                    <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
-                                        Cancel Product
-                                    </button>
-                                <% } else if (!item.cancelled && item.Status === 'Delivered') { %>
-                                    <button class="btn btn-dark btn-sm returnProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
-                                        Return Product
-                                    </button>
-                                <% } %>
-                            <% } %>
-                          </td>
+                        
+                        <td>
+                          <!-- Always show the View button -->
+                          <button class="btn btn-info btn-sm viewOrder" data-id="<%= order._id %>">View</button>
+                      
+                          <% if (order.paymentStatus === 'Failed') { %>
+                              <!-- Show Retry Payment button if payment failed -->
+                              <button class="btn btn-warning btn-sm retryPayment" data-id="<%= order._id %>">
+                                  Retry Payment
+                              </button>
+                          <% } else { %>
+                              <!-- Check if the item status is 'Returned' -->
+                              <% if (item.Status === 'Returned') { %>
+                                  <!-- Only show the View button if the item is returned -->
+                              <% } else { %>
+                                  <!-- Show Cancel or Return button based on other conditions if payment was successful -->
+                                  <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
+                                      <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
+                                          Cancel Product
+                                      </button>
+                                  <% } else if (!item.cancelled && item.Status === 'Delivered') { %>
+                                      <button class="btn btn-dark btn-sm returnProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
+                                          Return Product
+                                      </button>
+                                  <% } %>
+                              <% } %>
+                          <% } %>
+                      </td>
+                      
                       </tr>
                   <% }) %>
               <% }) %>

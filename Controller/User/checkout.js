@@ -413,5 +413,4 @@ module.exports={
     handleRazorpayPayment,
     applyCoupon
 
-
 }

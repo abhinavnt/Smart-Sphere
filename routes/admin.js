@@ -8,6 +8,7 @@ const categoryController=require("../Controller/Admin/category")
 const productController=require("../Controller/Admin/products")
 const offerController=require("../Controller/Admin/offerController")
 const couponController=require("../Controller/Admin/couponController")
+const salesCotroller=require("../Controller/Admin/salesController")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
 
@@ -60,6 +61,8 @@ router.post('/orders/:orderId/approve-cancellation/:productId', orderController.
 router.patch('/orders/:orderId/items/:productId/status',orderController.changeItemStatus);
 //render order details
 router.get('/:orderId/details',orderController.orderDetails)
+// Admin approves product return
+router.patch('/order/approve-return/:orderId/:productId', orderController.approveProductReturn);
 
 //--------------------------------------------------------------------offers--------------------------------------------------------------------
 router.get('/offer',offerController.offer)
@@ -75,6 +78,12 @@ router.get('/coupons',couponController.coupon);
 router.post('/coupons/add',couponController.addCoupon)
 router.patch('/coupons/edit/:id',couponController.editCoupon)
 router.delete('/coupons/delete/:couponId',couponController.deleteCoupon)
+
+//-----------------------------------------------------------------------Salesreport--------------------------------------------------------------------
+router.get('/sales-report',salesCotroller.salesReport)
+router.post('/generateReport',salesCotroller.generate)
+router.get('/sales-report/download/pdf',salesCotroller.pdf)
+router.get('/sales-report/download/excel',salesCotroller.excelReport)
 
 
 

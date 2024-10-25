@@ -34,9 +34,12 @@ const orderSchema = new mongoose.Schema({
             }, cancellationReason: {
               type: String,
                default: null
-           },Status: { 
-            type: String, 
-            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled','Refund'], 
+           },
+           returnRequested: { type: Boolean, default: false },
+           returnReason: String,
+            returned: { type: Boolean, default: false },
+            Status: { type: String, 
+            enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled','Refund','Returned'], 
             default: 'Processing' 
         }
         }
