@@ -7,6 +7,16 @@
     <link rel="stylesheet" href="/css/admin/category.css">
     <link rel="stylesheet" href="/css/admin/admin.css">
 </head>
+<style>
+    #searchInput {
+    width: 60% !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    border: 1px solid #555 !important;
+    background-color: #333 !important;
+    color: #fff !important;
+}
+</style>
 <body>
     <!-- Sidebar -->
     <%- include('partials/_sidebar') %>
@@ -19,7 +29,9 @@
         <!-- Simple Search Bar -->
         <input type="text" name="search" id="searchInput" placeholder="Search categories..." style="padding: 5px; width: 200px; margin-bottom: 10px;">
         
-        <span id="msg" style="color: rgb(243, 9, 9); margin-left: 10%;"> <%= msg %></span>
+        <span id="msg" style="color: rgb(243, 9, 9); margin-left: 10%;"> <%= msg %></span><br><br>
+         <!-- Add Category Button -->
+         <button class="add-category-btn" id="openModalBtn">Add Category</button>
     
         <div class="category-section">
             <table>

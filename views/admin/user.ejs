@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="/css/admin/user.css">
     <link rel="stylesheet" href="/css/admin/admin.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" >
+    <style>
+    #searchInput {
+    width: 60% !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    border: 1px solid #555 !important;
+    background-color: #333 !important;
+   
+}
+
+    </style>
 </head>
 
 <body class="bg-dark">
@@ -21,6 +32,41 @@
         <%- include('partials/_topBar') %>
 
         <h2>Users</h2>
+
+           <!-- Search Input -->
+           <input type="text" id="searchInput"  placeholder="Search users..." onkeyup="searchUsers()" class="form-control mb-3">
+           
+           <script>
+            function searchUsers() {
+                const input = document.getElementById("searchInput");
+                const filter = input.value.toLowerCase();
+                const tableBody = document.getElementById("userTableBody");
+                const rows = tableBody.getElementsByTagName("tr");
+                let noResults = true; // Flag to track if there are no results
+    
+                for (let i = 0; i < rows.length; i++) {
+                    const cells = rows[i].getElementsByTagName("td");
+                    let match = false;
+    
+                    // Check if the username or email matches the filter
+                    if (cells.length > 1) {
+                        const username = cells[0].textContent.toLowerCase();
+                        const email = cells[1].textContent.toLowerCase();
+    
+                        if (username.includes(filter) || email.includes(filter)) {
+                            match = true;
+                        }
+                    }
+    
+                    // Display or hide the row based on the match
+                    rows[i].style.display = match ? "" : "none";
+                    if (match) noResults = false; // Set flag to false if there is a match
+                }
+    
+                // Show or hide the "no results" message
+                document.getElementById("noResults").style.display = noResults ? "block" : "none";
+            }
+        </script>
         <table class="user-table">
             <thead>
                 <tr>
@@ -29,7 +75,7 @@
                     <th>Action</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="userTableBody">
                 <% users.forEach(user => { %>
                     <tr>
                         <td><%= user.username %></td>

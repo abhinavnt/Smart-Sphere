@@ -134,13 +134,14 @@ const placeOrder = async (req, res) => {
         const orderItems = [];
         const originalPrices = []; 
 
-        // Check product stock
+        
         for (const item of cart.items) {
             const product = item.productId;
+            if(!product.isListed) return res.status(400).json({message:`${product.name} is currently unavailble`})
             if (product.stock < item.quantity) {
                 outOfStockProducts.push(product.name);
             } else {
-                // Capture the original price before applying any discounts
+                
                 originalPrices.push( product.price * item.quantity );
                 console.log(product.price);
                 
@@ -160,6 +161,8 @@ const placeOrder = async (req, res) => {
         let sum = originalPrices.reduce((a,c)=> a+c,0)
 
          sum -=cart.totalPrice
+
+         if(paymentMethod=="cashOnDelivery"&& totalAmount>1000) return res.status(400).json({message:"Above 1000 can't use cash on delivery"})
 
         const newOrder = new orderSchema({
             userID: userId,
@@ -203,7 +206,7 @@ const placeOrder = async (req, res) => {
                 res.status(500).json({ message: 'Payment failed. Please try again.', orderId: newOrder._id });
             }
         } else {
-            // Handle COD orders
+            
             await newOrder.save();
             await CartSchema.findOneAndDelete({ userId: userId });
             res.json({ orderId: newOrder._id });

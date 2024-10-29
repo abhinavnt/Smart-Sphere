@@ -292,6 +292,8 @@ body {
     border-radius: 8px;
     margin-bottom: 20px;
 }
+
+
 .top-bar input[type="search"] {
     width: 60%;
     padding: 10px;
@@ -300,6 +302,9 @@ body {
     background-color: #333;
     color: #fff;
 }
+
+
+
 .top-bar .profile {
     display: flex;
     align-items: center;

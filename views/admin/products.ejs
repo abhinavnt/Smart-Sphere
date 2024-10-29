@@ -23,8 +23,18 @@
     }
 }
 
+.search-container {
+    margin-bottom: 20px; /* Space between search bar and table */
+}
 
-
+#searchInput {
+    width: 60% !important;
+    padding: 10px !important;
+    border-radius: 5px !important;
+    border: 1px solid #555 !important;
+    background-color: #333 !important;
+    color: #fff !important;
+}
 </style>
 </head>
 <body>
@@ -35,12 +45,18 @@
     <div class="main-content">
         <!-- top bar -->
         <%- include('partials/_topBar') %>
-        
+    
+
         <h2>Products</h2>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search products..." onkeyup="searchProducts()" />
+        </div>
+
         <a class="add-btn" id="addProductBtn">Add</a>
         
         <!-- Product Table -->
-        <table class="product-table">
+        <table class="product-table" id="productTable">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -359,6 +375,41 @@ document.getElementById("addProductForm").addEventListener("submit", async funct
         margin-right: 10px;
     }
 </style>
+
+<!-- search -->
+<script>
+    function searchProducts() {
+
+const input = document.getElementById("searchInput");
+const filter = input.value.toLowerCase();
+
+
+const table = document.getElementById("productTable");
+const rows = table.getElementsByTagName("tr");
+
+
+for (let i = 1; i < rows.length; i++) {
+const cells = rows[i].getElementsByTagName("td");
+let match = false;
+
+
+for (let j = 1; j < cells.length; j++) { 
+    const cell = cells[j];
+    if (cell) {
+        
+        if (cell.textContent.toLowerCase().includes(filter)) {
+            match = true; 
+            break; 
+        }
+    }
+}
+
+
+rows[i].style.display = match ? "" : "none";
+}
+}
+
+</script>
     
 </body>
 </html>
