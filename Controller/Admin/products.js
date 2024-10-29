@@ -108,13 +108,12 @@ const adminProducts = async (req, res) => {
     try {
         const productId = req.params.id;
   
-        // Find the product by ID
         const product = await ProductsSchema.findById(productId);
         if (!product) {
             return res.status(404).send('Product not found');
         }
   
-        // Update product fields
+        
         product.name = req.body.name || product.name;
         product.description = req.body.description || product.description;
         product.categoryID = req.body.categoryID || product.categoryID;
@@ -122,19 +121,19 @@ const adminProducts = async (req, res) => {
         product.price = req.body.price || product.price;
         product.colors = JSON.parse(req.body.colors) || product.colors;
   
-        // Handle image uploads
+        
         if (req.files && req.files.length > 0) {
-            // Assuming the first image is the main image and others are supporting images
+           
             for (let i = 0; i < req.files.length; i++) {
                 if (i < product.images.length) {
-                    product.images[i] = req.files[i].filename; // Update image paths
+                    product.images[i] = req.files[i].filename;
                 } else {
-                    product.images.push(req.files[i].filename); // Add new images
+                    product.images.push(req.files[i].filename); 
                 }
             }
         }
   
-        // Save the updated product
+       
         await product.save();
   
         res.status(200).json(product); // Send the updated product back

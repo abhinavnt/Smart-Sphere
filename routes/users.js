@@ -71,7 +71,7 @@ router.post('/cart/check-stock/:id',userAuth.checkUserSession,cartController.che
 router.patch('/cart/remove/:id',userAuth.checkUserSession,cartController.removeCart)
 router.patch('/cart/update/:userId',userAuth.checkUserSession,cartController.updateCart)
 
-// router.get('/cart/items-count/:userId',cartController.cartCount);
+router.get('/cart/items-count/:userId',cartController.cartCount);
 
 //-------------------------------------------------------------checkout-------------------------------------------------------------------------------
 router.get('/checkout/:id',userAuth.checkUserSession,checkoutcontroller.checkout)
@@ -98,5 +98,9 @@ router.get('/search',searchController.search)
 router.get('/wishlist',wishlistController.wishlist)
 router.post('/wishlist/add/:productId',wishlistController.addWishlist)
 router.delete('/wishlist/remove',wishlistController.removeFromWishlist)
+router.get('/wishlist/items-count/:userId', wishlistController.wishlistCount);
+
+//------------------------------------------------------------------wallet--------------------------------------------------------------------------
+
 
 module.exports = router;

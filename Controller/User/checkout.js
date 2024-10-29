@@ -315,7 +315,7 @@ const paymentSucess =async (req, res) => {
 
 
 const retryPayment=async (req, res) => {
-    console.log("endhlla viswshem");
+    
     try {
         const { orderId } = req.params;
         console.log(orderId);

@@ -108,8 +108,31 @@ const removeFromWishlist = async (req, res) => {
 
 
 
+//wishlist count
+const wishlistCount = async (req, res) => {
+    
+    const { userId } = req.params; 
+
+    try {
+        
+        const wishlist = await wishlistSchema.findOne({ userID: userId }); 
+
+        
+        const itemCount = wishlist ? wishlist.items.length : 0; 
+
+        
+        res.status(200).json({ itemCount }); 
+    } catch (error) {
+        console.error('Error fetching wishlist item count:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+
 module.exports = {
     addWishlist,
     removeFromWishlist,
-    wishlist
+    wishlist,
+    wishlistCount
 }

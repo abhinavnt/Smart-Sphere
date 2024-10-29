@@ -54,7 +54,7 @@ router.post("/products/:id", productController.isProductListed);
 //------------------------------------------------------------------orders---------------------------------------------------------------
 
 //render the orders
-router.get('/orders',orderController.order)
+router.get('/orders',adminAuth.checkAdminSession,orderController.order)
 //approve cancellation request
 router.post('/orders/:orderId/approve-cancellation/:productId', orderController.approveProductCancellation);
 //change the order status
@@ -65,7 +65,7 @@ router.get('/:orderId/details',orderController.orderDetails)
 router.patch('/order/approve-return/:orderId/:productId', orderController.approveProductReturn);
 
 //--------------------------------------------------------------------offers--------------------------------------------------------------------
-router.get('/offer',offerController.offer)
+router.get('/offer',adminAuth.checkAdminSession,offerController.offer)
 router.get('/products2',offerController.products)
 router.get('/categories',offerController.categories)
 router.post('/offers/add',offerController.addOffer)
@@ -74,13 +74,13 @@ router.patch('/offers/activate',offerController.activate)
 router.patch('/offers/deactivate',offerController.deactivate)
 
 //---------------------------------------------------------------------coupons-----------------------------------------------------------------------
-router.get('/coupons',couponController.coupon);
+router.get('/coupons',adminAuth.checkAdminSession,couponController.coupon);
 router.post('/coupons/add',couponController.addCoupon)
 router.patch('/coupons/edit/:id',couponController.editCoupon)
 router.delete('/coupons/delete/:couponId',couponController.deleteCoupon)
 
 //-----------------------------------------------------------------------Salesreport--------------------------------------------------------------------
-router.get('/sales-report',salesCotroller.salesReport)
+router.get('/sales-report',adminAuth.checkAdminSession,salesCotroller.salesReport)
 router.post('/generateReport',salesCotroller.generate)
 router.get('/sales-report/download/pdf',salesCotroller.pdf)
 router.get('/sales-report/download/excel',salesCotroller.excelReport)

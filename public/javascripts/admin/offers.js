@@ -38,29 +38,33 @@ function validateForm() {
     clearErrors();
 
     const offerName = document.getElementById('offerName').value;
-    const discount = document.getElementById('discount').value;
+    const discount = parseFloat(document.getElementById('discount').value);
     const targetType = document.getElementById('targetType').value;
     const selectedProducts = Array.from(document.querySelectorAll('#productSelect option:checked')).map(option => option.value);
     const selectedCategory = Array.from(document.querySelectorAll('#categorySelect option:checked')).map(option => option.value);
     
-    const startDate = new Date(document.getElementById('startDate').value);
-    const endDate = new Date(document.getElementById('endDate').value);
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
 
+    // Offer name validation
     if (!offerName || /^[^a-zA-Z0-9]+$/.test(offerName)) {
         document.getElementById('offerNameError').innerText = 'Offer name cannot be empty or contain only special characters.';
         isValid = false;
     }
 
-    if (discount < 0) {
-        document.getElementById('discountError').innerText = 'Discount cannot be a negative value.';
+    // Discount validation (between 0 and 99)
+    if (isNaN(discount) || discount < 0 || discount > 99) {
+        document.getElementById('discountError').innerText = 'Discount must be between 0 and 99%.';
         isValid = false;
     }
 
+    // Target type validation
     if (!targetType) {
         document.getElementById('targetTypeError').innerText = 'Please select a target type.';
         isValid = false;
     }
 
+    // Product or Category selection validation
     if (targetType === 'Product' && selectedProducts.length === 0) {
         document.getElementById('productSelectError').innerText = 'Please select at least one product.';
         isValid = false;
@@ -69,13 +73,15 @@ function validateForm() {
         isValid = false;
     }
 
-    if (endDate < startDate) {
-        document.getElementById('endDateError').innerText = 'End date cannot be before the start date.';
+    // Date validation (start and end date presence and order)
+    if (!startDate) {
+        document.getElementById('endDateError').innerText = 'Please select a start date.';
         isValid = false;
-    }
-
-    if(discount > 99){
-        document.getElementById('discountError').innerText = 'Discount cannot be more tha 99% .';
+    } else if (!endDate) {
+        document.getElementById('endDateError').innerText = 'Please select an end date.';
+        isValid = false;
+    } else if (new Date(endDate) < new Date(startDate)) {
+        document.getElementById('endDateError').innerText = 'End date cannot be before the start date.';
         isValid = false;
     }
 
@@ -94,7 +100,7 @@ document.getElementById('offerForm').onsubmit = function(e) {
             selectedProducts: Array.from(document.querySelectorAll('#productSelect option:checked')).map(option => option.value),
             selectedCategory: Array.from(document.querySelectorAll('#categorySelect option:checked')).map(option => option.value)
         };
-        console.log(offerData);
+       
         
         axios.post('/admin/offers/add', offerData)
             .then(response => {
@@ -134,7 +140,7 @@ function updateProducts() {
                 items.forEach(item => {
                     const option = document.createElement('option');
                     option.value = item._id; 
-                    option.textContent = item.name;
+                    option.textContent =  targetType === 'Category' ? item.categoryName : item.name;
                     selectElement.appendChild(option);
                 });
 
@@ -237,6 +243,8 @@ function fetchOptions(url, selectElement, selectedValues) {
     axios.get(url)
         .then(response => {
             const items = response.data;
+            console.log(items);
+            
             items.forEach(item => {
                 const option = document.createElement('option');
                 option.value = item._id; 

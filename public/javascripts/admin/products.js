@@ -3,14 +3,14 @@
 
 
 
-//list unlist functions
+
 function toggleProduct(productId) {
   const isListedButton = document.querySelector(`button[onclick="toggleProduct('${productId}')"]`);
 
   const isListed = isListedButton.classList.contains('listed');
   const actionText = isListed ? 'Unlist' : 'List'; 
 
-  // SweetAlert confirmation dialog
+  
   swal({
     title: `Are you sure you want to ${actionText.toLowerCase()} this product?`,
     icon: "warning",
@@ -19,26 +19,26 @@ function toggleProduct(productId) {
   })
   .then((willToggle) => {
     if (willToggle) {
-      // If confirmed, make the axios request
+    
       axios.post(`/admin/products/${productId}`, { isListed: !isListed })
         .then(response => {
           if (response.data.success) {
-            // Toggle button text and status based on the new state
+           
             isListedButton.classList.toggle('listed', !isListed);
             isListedButton.classList.toggle('unlisted', isListed);
             isListedButton.textContent = isListed ? 'List' : 'Unlist';
           } else {
-            // Show error alert if something went wrong
+           
             swal("Error", response.data.message || 'Error updating product status.', "error");
           }
         })
         .catch(error => {
           console.error('Error toggling product listing:', error);
-          // Show error alert if the request fails
+        
           swal("Error", 'An error occurred while updating the product status. Please try again.', "error");
         });
     } else {
-      // Cancelled the action
+     
       swal("Action cancelled", "Your product status is unchanged", "info");
     }
   });
@@ -75,6 +75,7 @@ function editProduct(productId) {
           document.getElementById('editStock').value = product.stock;
           document.getElementById('editPrice').value = product.price;
           document.getElementById('editColors').value = product.colors.join(',');
+          document.getElementById('editCategoryID').value=product.categoryID._id
 
           // Display current images
           const currentImagesContainer = document.getElementById('editCurrentImages');

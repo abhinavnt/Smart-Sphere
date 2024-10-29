@@ -271,20 +271,20 @@ const updateCart = async (req, res) => {
 
 
 
-// const cartCount=  async (req, res) => {
-//     const { userId } = req.params;
+const cartCount=  async (req, res) => {
+    const { userId } = req.params;
     
-//     try {
-//         const cart = await CartSchema.findOne({ userId });
+    try {
+        const cart = await CartSchema.findOne({ userId });
         
-//         const itemCount = cart ? cart.items.length : 0;  // Count the number of items
+        const itemCount = cart ? cart.items.length : 0;  // Count the number of items
         
-//         res.status(200).json({ itemCount });
-//     } catch (error) {
-//         console.error('Error fetching cart item count:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//     }
-// }
+        res.status(200).json({ itemCount });
+    } catch (error) {
+        console.error('Error fetching cart item count:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
 
 
 
@@ -296,6 +296,6 @@ module.exports={
     check_stock,
     addCart,
 
-    // cartCount
+    cartCount
 
 }

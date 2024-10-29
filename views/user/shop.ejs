@@ -191,11 +191,11 @@
                             Popularity
                         </a>
                     </div>
-                    <div class="col-md-4 mb-2">
+                    <!-- <div class="col-md-4 mb-2">
                         <a href="#" class="filter-link text-white btn btn-dark btn-block rounded-pill px-3" data-sort="averageRating">
                             Avg. Rating
                         </a>
-                    </div>
+                    </div> -->
                     <div class="col-md-4 mb-2">
                         <a href="#" class="filter-link text-white btn btn-dark btn-block rounded-pill px-3" data-sort="newness">
                             New arrivals 
@@ -482,7 +482,7 @@
     document.querySelectorAll('.filter-tope-group button').forEach(button => {
         button.addEventListener('click', function() {
             const filterValue = this.getAttribute('data-filter');
-            console.log("Clicked filter: ", filterValue); // Debug log
+           ; 
 
             document.querySelectorAll('.filter-tope-group button').forEach(btn => {
                 btn.classList.remove('how-active1');
