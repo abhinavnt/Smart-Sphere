@@ -504,11 +504,11 @@
                                   Retry Payment
                               </button>
                           <% } else { %>
-                              <!-- Check if the item status is 'Returned' -->
+                              
                               <% if (item.Status === 'Returned') { %>
-                                  <!-- Only show the View button if the item is returned -->
+                                 
                               <% } else { %>
-                                  <!-- Show Cancel or Return button based on other conditions if payment was successful -->
+                                  
                                   <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
                                       <button class="btn btn-danger btn-sm cancelProduct" data-orderid="<%= order._id %>" data-productid="<%= item.productID._id %>">
                                           Cancel Product
@@ -623,11 +623,8 @@
               aria-hidden="true"
             >
               <div class="modal-dialog modal-lg modal-dialog-centered">
-                <!-- Use 'modal-lg' for a larger modal and 'modal-dialog-centered' for center alignment -->
                 <div class="modal-content border-0 shadow-lg rounded-4">
-                  <!-- Rounded corners and shadow -->
                   <div class="modal-header bg-primary text-white">
-                    <!-- Add background color and white text for header -->
                     <h5 class="modal-title" id="orderDetailModalLabel">
                       Order Details
                     </h5>
@@ -637,7 +634,6 @@
                       data-bs-dismiss="modal"
                       aria-label="Close"
                     ></button>
-                    <!-- White close button -->
                   </div>
                   <div class="modal-body">
                     <h5 class="mb-3">
@@ -648,7 +644,6 @@
                       Ordered Date:
                       <span id="orderedDate" class="fw-normal"></span>
                     </h5>
-                    <!-- Light weight for span -->
                     <h5 class="mb-3">
                       Order Time: <span id="orderTime" class="fw-normal"></span>
                     </h5>
@@ -658,20 +653,16 @@
 
                     <h5 class="mb-2">Shipping Address:</h5>
                     <p id="shippingAddress" class="mb-4"></p>
-                    <!-- Add margin for better spacing -->
 
                     <h5 class="mb-2">Ordered Products:</h5>
                     <div id="orderedProducts" class="row mb-4"></div>
-                    <!-- Margin for spacing -->
 
                     <h5>
                       Total Amount:
                       <span id="totalAmount" class="fw-bold"></span>
                     </h5>
-                    <!-- Bold for total amount -->
                   </div>
                   <div class="modal-footer bg-light">
-                    <!-- Soft background for footer -->
                     <button
                       type="button"
                       class="btn btn-secondary"
@@ -679,11 +670,18 @@
                     >
                       Close
                     </button>
+                    <button
+                    type="button"
+                    class="btn btn-primary"
+                    onclick="downloadInvoice()"
+                  >
+                    Download Invoice
+                  </button>
                   </div>
                 </div>
               </div>
             </div>
-
+           
 
 
             <!-- walltet -->
@@ -745,6 +743,8 @@
     <!-- footer -->
 
     <%- include('partials/_footer')%>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.3.2/html2canvas.min.js"></script>
 
     <!--===============================================================================================-->
     <script src="/vendor/jquery/jquery-3.2.1.min.js"></script>

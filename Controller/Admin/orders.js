@@ -187,7 +187,7 @@ const approveProductReturn = async (req, res) => {
 
       const totalAmount = item.price * item.quantity;
       if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
-          item.Status = "Refunded";
+          item.Status = "Refund";
           await refundToWallet(order.userID, totalAmount, orderId, productId);
       }
 

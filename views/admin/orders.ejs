@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" >
 
     <style>
-       .modal {
+       .modal1 {
     display: none; /* Hidden by default */
     position: fixed;
     top: 0;
@@ -25,7 +25,7 @@
 }
 
 /* Modal content box */
-.modal-content {
+.modal-content1 {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -193,8 +193,8 @@
 
 
         <!-- Cancellation Reason Modal -->
-        <div class="modal" id="cancellationModal" style="display:none;">
-            <div class="modal-content">
+        <div class="modal1" id="cancellationModal" style="display:none;">
+            <div class="modal-content1">
                 <span class="close" onclick="closeModal()">&times;</span>
                 <h5>Cancellation Request</h5>
                 <p id="cancellationReasonText"></p> <!-- Reason will be dynamically inserted here -->
@@ -237,9 +237,9 @@
 
 
         
-    </div>
+    
         
-    </div>
+    
 <!-- Include SweetAlert -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -379,6 +379,11 @@
 });
 
     
+
+
+
+
+
   // Approve cancellation modal
 function showCancellationModal(reason, orderId, productId) {
     document.getElementById('cancellationReasonText').innerText = `Reason: ${reason}`;
@@ -431,6 +436,8 @@ function approveProductCancellation(orderId, productId) {
 <!-- Bootstrap JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
+
+<!-- return request -->
   <script>
    function showReturnModal(returnReason, orderId, productId) {
     Swal.fire({
@@ -446,7 +453,7 @@ function approveProductCancellation(orderId, productId) {
         confirmButtonText: "Approve Return"
     }).then((result) => {
         if (result.isConfirmed) {
-            // Call the backend API to approve the return
+            
             approveReturnRequest(orderId, productId);
         }
     });
@@ -458,12 +465,12 @@ async function approveReturnRequest(orderId, productId) {
         const response = await axios.patch(`/admin/order/approve-return/${orderId}/${productId}`);
         
         if (response.status === 200) {
-            // Show success message
+            
             Swal.fire("Approved!", response.data.message, "success");
-            // Optionally, refresh the page or update the UI
+            
             location.reload();
         } else {
-            // Show error message if approval fails
+           
             Swal.fire("Error!", response.data.message, "error");
         }
     } catch (error) {

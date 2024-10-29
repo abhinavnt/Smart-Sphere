@@ -5,43 +5,55 @@ document.addEventListener("DOMContentLoaded", function () {
   viewOrderButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id");
-      
-      axios.get(`/admin/${orderId}/details`)
+      console.log(orderId);
+
+      // Fetch order details using Axios
+      axios
+        .get(`/admin/${orderId}/details`)
         .then((response) => {
           const order = response.data;
-          console.log(order);
-          
 
-          
-          document.getElementById("orderedDate").innerText = new Date(order.orderedDate).toLocaleDateString();
+          // Populate the modal with order details
+          document.getElementById("orderedDate").innerText = new Date(
+            order.orderedDate
+          ).toLocaleDateString();
+          document.getElementById("orderTime").innerText = new Date(
+            order.orderedDate
+          ).toLocaleTimeString();
           document.getElementById("orderStatus").innerText = order.orderStatus;
+          document.getElementById(
+            "shippingAddress"
+          ).innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address}, ${order.shippingAddress.pincode}`;
           document.getElementById("orderID").innerText = order.orderid;
-          document.getElementById("shippingAddress").innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address}, ${order.shippingAddress.pincode}`;
-
-          const productsContainer = document.getElementById("orderedProducts");
-          productsContainer.innerHTML = ""; 
+          // Create a container to hold product details with enhanced styling
+          let productsHtml = "";
 
           order.items.forEach((item) => {
-            productsContainer.innerHTML += `
-              <div class="col-md-4">
-                <div class="card mb-3">
-                 <p class="card-text">Quantity: ${order._id}</p>
+            productsHtml += `
+              <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
                   <img src="/${item.productID.images[0]}" class="card-img-top" alt="${item.productID.name}">
                   <div class="card-body">
-                    <h5 class="card-title">${item.productID.name}</h5>
-                    <p class="card-text">Price: ₹${item.productID.price}</p>
-                    <p class="card-text">Quantity: ${item.quantity}</p>
-                    <button class="btn btn-danger" onclick="cancelProduct('${order._id}', '${item.productID._id}')">Cancel Product</button>
+                    <h6 class="card-title">${item.productID.name}</h6>
+                    <div class="d-flex justify-content-between">
+                      <p class="card-text mb-1">Price: ₹${item.productID.price}</p>
+                      <p class="card-text mb-1">Quantity: ${item.quantity}</p>
+                    </div>
                   </div>
                 </div>
               </div>
             `;
           });
 
-          document.getElementById("totalAmount").innerText = `₹${order.totalAmount}`;
+          // Set all products HTML once at the end
+          document.getElementById("orderedProducts").innerHTML = productsHtml;
 
-        
-          const modal = new bootstrap.Modal(document.getElementById("orderDetailModal"));
+          document.getElementById("totalAmount").innerText = `${order.totalAmount}`;
+
+          // Show the modal
+          const modal = new bootstrap.Modal(
+            document.getElementById("orderDetailModal")
+          );
           modal.show();
         })
         .catch((error) => {
@@ -51,6 +63,71 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 });
+
+
+function downloadInvoice() {
+  const { jsPDF } = window.jspdf;
+
+  // Create a new jsPDF instance
+  const pdf = new jsPDF("p", "mm", "a4");
+
+  // Add title
+  pdf.setFontSize(20);
+  pdf.text("Invoice", 105, 20, { align: "center" });
+
+  // Get the order details
+  const orderId = document.getElementById("orderID").innerText;
+  const orderedDate = document.getElementById("orderedDate").innerText;
+  const orderStatus = document.getElementById("orderStatus").innerText;
+  const shippingAddress = document.getElementById("shippingAddress").innerText;
+  const totalAmount = document.getElementById("totalAmount").innerText;
+
+  // Add order info
+  pdf.setFontSize(12);
+  pdf.text(`Order ID: ${orderId}`, 10, 30);
+  pdf.text(`Ordered Date: ${orderedDate}`, 10, 40);
+  pdf.text(`Order Status: ${orderStatus}`, 10, 50);
+  pdf.text(`Shipping Address: ${shippingAddress}`, 10, 60);
+
+  // Add a line break
+  pdf.text("", 10, 70);
+
+  // Add table header
+  pdf.setFontSize(14);
+  pdf.text("Ordered Products", 10, 80);
+  pdf.setFontSize(12);
+  pdf.text("Product Name", 10, 90);
+  pdf.text("Price", 80, 90);
+  pdf.text("Quantity", 120, 90);
+  pdf.text("Total", 160, 90);
+
+  // Get product details
+  const orderItems = [...document.querySelectorAll("#orderedProducts .card-body")];
+  let yPosition = 100;
+
+  orderItems.forEach(item => {
+    const productName = item.querySelector(".card-title").innerText;
+    const productPrice = item.querySelectorAll(".card-text")[0].innerText.replace('Price: ₹', '');
+    const quantity = item.querySelectorAll(".card-text")[1].innerText.replace('Quantity: ', '');
+    const total = (parseFloat(productPrice) * parseInt(quantity)).toFixed(2);
+
+    pdf.text(productName, 10, yPosition);
+    pdf.text(`${productPrice}`, 80, yPosition);
+    pdf.text(`${total}`, 160, yPosition);
+    pdf.text(quantity, 120, yPosition);
+
+    yPosition += 10; 
+  });
+
+  // Add total amount
+  pdf.setFontSize(14);
+  pdf.text(`Total Amount ${totalAmount}`, 10, yPosition + 10);
+
+  // Save the PDF
+  pdf.save(`Invoice_${orderId}.pdf`);
+}
+
+
 
 
 // Function to cancel a specific product
