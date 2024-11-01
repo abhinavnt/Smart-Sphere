@@ -98,12 +98,13 @@ const checkout = async (req, res) => {
     }
 
     const cart = await CartSchema.findOne({userId})
-    const totalPrice = cart.totalPrice
+    const totalPrice = cart.totalPrice +deliveryFee
     console.log("checking",totalPrice);
     
     // Use cartSubtotal directly
-    let total = cartSubtotal - discount + deliveryFee;
-
+    let total = cartSubtotal - discount +deliveryFee;
+    console.log(total);
+    
     console.log(populatedCartItems);
 
     res.render('user/checkout', {

@@ -3,49 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Admin Dashboard</title>
     <link rel="stylesheet" href="/css/admin/admin.css">
-    <link rel="stylesheet" href="/css/admin/dashboard.css"> <!-- New CSS for dashboard -->
+    <link rel="stylesheet" href="/css/admin/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <style>
     .report-summary {
-    display: flex;
-    justify-content: space-between;
-    margin: 20px 0;
-}
-
-.report-card {
-    background-color: #444;
-    padding: 20px;
-    border-radius: 10px;
-    width: 30%;
-    color: #fff;
-    text-align: center;
-}
-
-.view-report-btn {
-    padding: 10px 20px;
-    background-color: #6d60e4;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.view-report-btn:hover {
-    background-color: #422feb;
-}
-
+        display: flex;
+        justify-content: space-between;
+        margin: 20px 0;
+    }
+    .report-card {
+        background-color: #444;
+        padding: 20px;
+        border-radius: 10px;
+        width: 30%;
+        color: #fff;
+        text-align: center;
+    }
+    .view-report-btn {
+        padding: 10px 20px;
+        background-color: #6d60e4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .view-report-btn:hover {
+        background-color: #422feb;
+    }
+    .chart-row {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+    .chart-container {
+        width: 48%;
+    }
+    table {
+        width: 100%;
+        margin-top: 20px;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+    th {
+        background-color: #6d60e4;
+        color: white;
+    }
 </style>
 <body>
     <!-- Sidebar -->
-   <%- include('partials/_sidebar') %>
+    <%- include('partials/_sidebar') %>
 
     <!-- Main Content -->
     <div class="main-content">
-        <!-- Top Bar with Search and Profile -->
         <%- include('partials/_topBar') %>
-
         <h2>Dashboard</h2>
 
         <!-- Sales Report Section -->
@@ -64,23 +82,172 @@
             </div>
         </div>
         <button class="view-report-btn" onclick="window.location.href='/admin/sales-report'">View Sales Report</button>
+
+        <!-- Time Period Filter -->
+        <div>
+            <label for="timePeriodFilter">Select Period:</label>
+            <select id="timePeriodFilter" onchange="updateDashboardData()">
+                <option value="yearly">Yearly</option>
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+                <option value="daily">Daily</option>
+            </select>
+        </div>
+
+        <!-- Chart Row Container for Total Sales and Revenue -->
+        <div class="chart-row">
+            <div class="chart-container">
+                <h3>Total Sales</h3>
+                <canvas id="totalSalesChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Total Revenue</h3>
+                <canvas id="totalRevenueChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Table for Best Selling Products -->
+        <h3>Best Selling Products</h3>
+        <table id="bestSellingProductsTable">
+            <thead>
+                <tr>
+                    <th>Product Name</th>
+                    <th>Total Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+
+        <!-- Table for Best Selling Categories -->
+        <h3>Best Selling Categories</h3>
+        <table id="bestSellingCategoriesTable">
+            <thead>
+                <tr>
+                    <th>Category Name</th>
+                    <th>Total Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
-        async function fetchSalesSummary() {
+        let totalSalesChart, totalRevenueChart;
+
+        async function updateDashboardData() {
+            const period = document.getElementById('timePeriodFilter').value;
             try {
-                const response = await axios.get('/api/sales-summary');
-                document.getElementById('totalSalesCount').innerText = response.data.totalSalesCount;
-                document.getElementById('totalRevenue').innerText = `$${response.data.totalRevenue.toFixed(2)}`;
-                document.getElementById('totalDiscount').innerText = `$${response.data.totalDiscount.toFixed(2)}`;
+                const response = await axios.get(`/admin/dashboard-data?period=${period}`);
+                const { salesSummary, bestSellingProducts, bestSellingCategories } = response.data;
+
+                console.log("Dashboard Data:", response.data);
+
+                // Update Sales Summary
+                document.getElementById('totalSalesCount').innerText = salesSummary.totalSalesCount || 0;
+                document.getElementById('totalRevenue').innerText = `${(salesSummary.totalRevenue || 0).toFixed(2)}`;
+                document.getElementById('totalDiscount').innerText = `${(salesSummary.totalDiscount || 0).toFixed(2)}`;
+
+                // Update Charts for Total Sales and Revenue
+                updateTotalSalesChart(salesSummary.totalSalesCount || 0);
+                updateTotalRevenueChart(salesSummary.totalRevenue || 0);
+
+                // Update Best Selling Products Table
+                updateTable('bestSellingProductsTable', bestSellingProducts);
+
+                // Update Best Selling Categories Table
+                updateTable('bestSellingCategoriesTable', bestSellingCategories);
             } catch (error) {
-                console.error('Error fetching sales summary:', error);
+                console.error("Error fetching dashboard data:", error);
             }
         }
 
-        // Call the function when the dashboard loads
-        fetchSalesSummary();
+        function updateTotalSalesChart(totalSales) {
+            const ctx = document.getElementById('totalSalesChart').getContext('2d');
+            
+            // Destroy previous chart instance if it exists to avoid overlap
+            if (totalSalesChart) {
+                totalSalesChart.destroy();
+            }
+
+            // Create a new chart for Total Sales
+            totalSalesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Sales'],
+                    datasets: [{
+                        label: 'Total Sales',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1,
+                        data: [totalSales]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTotalRevenueChart(totalRevenue) {
+            const ctx = document.getElementById('totalRevenueChart').getContext('2d');
+            
+            // Destroy previous chart instance if it exists to avoid overlap
+            if (totalRevenueChart) {
+                totalRevenueChart.destroy();
+            }
+
+            // Create a new chart for Total Revenue
+            totalRevenueChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Revenue'],
+                    datasets: [{
+                        label: 'Total Revenue',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        data: [totalRevenue]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTable(tableId, data) {
+            const tableBody = document.getElementById(tableId).querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                const cell1 = document.createElement('td');
+                const cell2 = document.createElement('td');
+
+                // Use 'name' or 'categoryName' if available; fallback to '_id'
+                cell1.innerText = item.name || item.categoryName || item._id;
+                cell2.innerText = item.totalSold;
+
+                row.appendChild(cell1);
+                row.appendChild(cell2);
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Initial data load
+        updateDashboardData();
     </script>
 </body>
 </html>

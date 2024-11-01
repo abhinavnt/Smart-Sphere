@@ -9,6 +9,7 @@ const productController=require("../Controller/Admin/products")
 const offerController=require("../Controller/Admin/offerController")
 const couponController=require("../Controller/Admin/couponController")
 const salesCotroller=require("../Controller/Admin/salesController")
+const dasboardController=require("../Controller/Admin/dashBoardController")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
 
@@ -22,7 +23,7 @@ router.get("/logout", adminController.logoutAdmin);
 //----------------------------------------------------------------dashBoard------------------------------------------------------------------------
 
 //admin dasboard
-router.get("/dashboard",adminAuth.checkAdminSession,adminController.adminDashBoard);
+router.get("/dashboard",adminController.adminDashBoard);
 //admin user management
 router.get("/users", adminAuth.checkAdminSession, adminController.adminUser);
 //admin user block
@@ -84,6 +85,9 @@ router.get('/sales-report',adminAuth.checkAdminSession,salesCotroller.salesRepor
 router.post('/generateReport',salesCotroller.generate)
 router.get('/sales-report/download/pdf',salesCotroller.pdf)
 router.get('/sales-report/download/excel',salesCotroller.excelReport)
+
+//-------------------------------------------------------------------------dashboard-----------------------------------------------------------------
+router.get('/dashboard-data', dasboardController.dashboardData);
 
 
 
