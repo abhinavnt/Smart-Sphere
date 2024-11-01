@@ -9,6 +9,7 @@ const searchController=require("../Controller/User/search")
 const shopController=require("../Controller/User/shop")
 const profileController=require("../Controller/User/profile")
 const wishlistController=require("../Controller/User/wishlistController")
+const walletController=require("../Controller/User/walletController")
 const passport=require("../config/passPort")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
@@ -101,6 +102,6 @@ router.delete('/wishlist/remove',wishlistController.removeFromWishlist)
 router.get('/wishlist/items-count/:userId', wishlistController.wishlistCount);
 
 //------------------------------------------------------------------wallet--------------------------------------------------------------------------
-
+router.get('/wallet/transactions',walletController.transaction)
 
 module.exports = router;

@@ -669,3 +669,41 @@ function resetValidationMessages() {
   const errorMessages = document.querySelectorAll('.form-text.text-danger');
   errorMessages.forEach(msg => msg.remove());
 }
+
+
+
+//show all Transaction Modal
+document.addEventListener('DOMContentLoaded', () => {
+  const viewTransactionsButton = document.getElementById('viewTransactionsButton');
+  const transactionsModal = document.getElementById('transactionsModal');
+
+  viewTransactionsButton.addEventListener('click', async () => {
+      try {
+          const response = await axios.get('/wallet/transactions');
+          const transactions = response.data;
+
+          const transactionsContainer = document.getElementById('transactionsContainer');
+          transactionsContainer.innerHTML = '';
+
+          transactions.forEach(transaction => {
+              const transactionItem = document.createElement('div');
+              transactionItem.className = 'list-group-item';
+              transactionItem.innerHTML = `
+                  <div class="d-flex justify-content-between">
+                      <strong>${transaction.type}</strong>
+                      <small>${new Date(transaction.date).toLocaleDateString('en-IN')}</small>
+                  </div>
+                  <p class="mb-1">Amount: <span class="text-success">${transaction.amount}</span></p>
+                  <small>${transaction.description}</small>
+              `;
+              transactionsContainer.appendChild(transactionItem);
+          });
+
+          // Show the modal after loading transactions
+          const modal = new bootstrap.Modal(transactionsModal);
+          modal.show();
+      } catch (error) {
+          console.error('Error fetching transactions:', error);
+      }
+  });
+});
