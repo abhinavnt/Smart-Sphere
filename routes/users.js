@@ -10,6 +10,7 @@ const shopController=require("../Controller/User/shop")
 const profileController=require("../Controller/User/profile")
 const wishlistController=require("../Controller/User/wishlistController")
 const walletController=require("../Controller/User/walletController")
+const couponController=require("../Controller/User/couponController")
 const passport=require("../config/passPort")
 
 //----------------------------------------------------------------Login------------------------------------------------------------------------
@@ -103,5 +104,10 @@ router.get('/wishlist/items-count/:userId', wishlistController.wishlistCount);
 
 //------------------------------------------------------------------wallet--------------------------------------------------------------------------
 router.get('/wallet/transactions',walletController.transaction)
+
+
+//----------------------------------------------------------------coupon----------------------------------------------------------------------------------
+
+router.get('/coupons/available',couponController.availableCoupon)
 
 module.exports = router;
