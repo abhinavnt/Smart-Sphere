@@ -202,7 +202,7 @@ const removeCart = async (req, res) => {
     !mongoose.Types.ObjectId.isValid(user) ||
     !mongoose.Types.ObjectId.isValid(itemId)
   ) {
-    console.log(user);
+    
     return res.status(400).send("Invalid user or item ID");
   }
 
@@ -277,7 +277,7 @@ const cartCount=  async (req, res) => {
     try {
         const cart = await CartSchema.findOne({ userId });
         
-        const itemCount = cart ? cart.items.length : 0;  // Count the number of items
+        const itemCount = cart ? cart.items.length : 0; 
         
         res.status(200).json({ itemCount });
     } catch (error) {

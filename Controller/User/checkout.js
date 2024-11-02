@@ -29,7 +29,7 @@ const checkout = async (req, res) => {
 
     const addresses = await addressSchema.find({ user: userId });
 
-    // Fetch cart items and populate product details
+    
     const cartItems = await CartSchema.find({ userId }).populate('items.productId');
 
     if (!cartItems || cartItems.length === 0) {
@@ -58,7 +58,7 @@ const checkout = async (req, res) => {
                 continue;
             }
 
-            // Fetch applicable offers
+            //  applicable offers
             const productOffers = await offerSchema.find({
                 isActive: true,
                 targetType: 'Product',
@@ -101,7 +101,7 @@ const checkout = async (req, res) => {
     const totalPrice = cart.totalPrice +deliveryFee
     console.log("checking",totalPrice);
     
-    // Use cartSubtotal directly
+   
     let total = cartSubtotal - discount +deliveryFee;
     console.log(total);
     
@@ -189,7 +189,7 @@ const placeOrder = async (req, res) => {
         if (paymentMethod === 'bankTransfer') {
             try {
                 const razorpayOrder = await razorpay.orders.create({
-                    amount: totalAmount * 100, // Convert to paise
+                    amount: totalAmount * 100, 
                     currency: 'INR',
                     receipt: `receipt_${newOrder._id}`
                 });
@@ -288,7 +288,7 @@ const handleRazorpayPayment = async (req, res) => {
             order.paymentStatus = 'Failed';
             console.log( order.paymentStatus);
             
-            order.razorpayPaymentId = req.body.paymentId; // Handle the failure payload
+            order.razorpayPaymentId = req.body.paymentId; 
 
             await order.save();
             return res.status(200).json({ message: 'Payment failure handled successfully.' });
@@ -301,13 +301,13 @@ const handleRazorpayPayment = async (req, res) => {
     }
 }
 
-
+//paymentSucess
 const paymentSucess =async (req, res) => {
     try {
         const { orderId } = req.params;
         const { paymentId } = req.body;
 
-        // Find the order and update the payment status to 'Success'
+        
         await orderSchema.findByIdAndUpdate(orderId, { paymentStatus: 'Success' });
 
         res.status(200).json({ message: 'Payment successful', paymentId });
@@ -317,7 +317,7 @@ const paymentSucess =async (req, res) => {
     }
 }
 
-
+//retry payment
 const retryPayment=async (req, res) => {
     
     try {
@@ -325,7 +325,7 @@ const retryPayment=async (req, res) => {
         console.log(orderId);
         
         
-        // Find the order by orderId
+        
         const order = await orderSchema.findById(orderId);
         console.log(order);
         console.log(order.paymentStatus);
@@ -335,7 +335,7 @@ const retryPayment=async (req, res) => {
             return res.status(400).json({ message: 'Cannot retry payment for this order.' });
         }
 
-        // Send the razorpayOrderId to the frontend for retry
+        // razorpayOrderId to the frontend for retry
         res.json({
             razorpayOrderId: order.razorpayOrderId,
             totalAmount: order.totalAmount,
@@ -347,7 +347,7 @@ const retryPayment=async (req, res) => {
     }
 }
 
-
+//apply coupons
 const applyCoupon = async (req, res) => {
     const { couponCode } = req.body;    
     const userId = req.session.user._id;  
@@ -385,7 +385,7 @@ const applyCoupon = async (req, res) => {
             discount = (cart.totalPrice * coupon.discountAmount) / 100;
         }
 
-        // Ensure the total doesn't go below zero
+        
         const newTotal = Math.max(cart.totalPrice - discount, 0);
             
             if(newTotal<100) return res.status(400).json({ message: `Cart Minimum Amount is 100 Can't Use This Coupon` });

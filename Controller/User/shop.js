@@ -54,31 +54,31 @@ const shopRender = async (req, res) => {
 
   
 
-   //sending the formated products
+  
    const formattedProducts = products.map(product => {
     const originalPrice = product.price;
 
-    // Find the applicable product offer
+  
     const productOffer = productOffers.find(offer => 
         offer.selectedProducts.some(selectedId => selectedId.equals(product._id))
     );
 
-    // Calculate product offer discounted price
+    //  discounted price
     const productDiscountedPrice = productOffer 
         ? Math.round(originalPrice - (originalPrice * (productOffer.discountAmount / 100))) 
         : null;
 
-    // Find the applicable category offer
+    
     const categoryOffer = categoryOffers.find(offer => 
         offer.selectedCategory.some(selectedId => selectedId.equals(product.categoryID))
     );
 
-    // Calculate category offer discounted price
+    
     const categoryDiscountedPrice = categoryOffer 
         ? Math.round(originalPrice - (originalPrice * (categoryOffer.discountAmount / 100))) 
         : null;
 
-    // Determine the best offer
+    
     let bestDiscountedPrice = null;
     let hasOffer = false;
 
@@ -138,40 +138,40 @@ const product_detail = async (req, res) => {
   try {
       const id = req.params.id;
 
-      // Fetch the product by ID
+      
       const product = await ProductsSchema.findById(id);
       if (!product) {
           return res.status(404).json({ message: 'Product not found' });
       }
 
-      // Fetch related products
+      
       const relatedProducts = await ProductsSchema.find({
           categoryID: product.categoryID,
           _id: { $ne: product._id },
           isListed: true
       }).limit(8);
 
-      // Fetch active offers for the specific product
+      
       const productOffers = await offerSchema.find({
           isActive: true,
           targetType: 'Product',
           selectedProducts: product._id
       });
 
-      // Ensure categoryIDs is an array
+      
       const categoryIDs = [product.categoryID]; 
-      console.log('Category IDs:', categoryIDs); // Log category IDs
+     
 
-      // Fetch active category offers
+      
       const categoryOffers = await offerSchema.find({
           isActive: true,
           targetType: 'Category',
           selectedCategory: { $in: categoryIDs }
       }).populate('selectedCategory'); 
 
-      console.log('Category Offers:', categoryOffers); // Log category offers
 
-      // Format the product data to include offer information
+
+      //  product data to include offer information
       const productOffer = productOffers.length > 0 ? productOffers[0] : null;
       const categoryOffer = categoryOffers.length > 0 ? categoryOffers[0] : null;
 
@@ -193,7 +193,7 @@ const product_detail = async (req, res) => {
           } : { hasOffer: false }
       };
 
-      // If there's a category offer, calculate the discounted price
+      //  category offer, calculate the discounted price
       if (categoryOffer) {
           const categoryDiscountedPrice = Math.round(product.price - (product.price * (categoryOffer.discountAmount / 100)));
           formattedProduct.categoryOffer = {
@@ -202,7 +202,7 @@ const product_detail = async (req, res) => {
           };
       }
 
-      // Render the product detail page with the formatted product and related products
+     
       res.render('user/product-detail', {
           user: req.session.user ?? false,
           product: formattedProduct,

@@ -19,20 +19,20 @@ const adminProducts = async (req, res) => {
     const skip = (page - 1) * limit;
   
     try {
-      // Count total products
+      
       const totalProducts = await ProductsSchema.countDocuments();
       const category = await categorySchema.find();
   
-      // Fetch products with pagination
+     
       const products = await ProductsSchema.find().sort({ _id: -1 })
         .skip(skip)
         .limit(limit)
         .populate("categoryID");
   
-      // Calculate total pages
+      
       const totalPages = Math.ceil(totalProducts / limit);
   
-      // Render the product page with the retrieved data
+      
       res.render("admin/products", {
         products,
         currentPage: page,
@@ -54,7 +54,7 @@ const adminProducts = async (req, res) => {
         const { name, categoryID, price, stock, colors, description } = req.body;
           console.log(price);
           
-        // Create a new product document
+        
         const newProduct = new ProductsSchema({
             name,
             categoryID,
@@ -103,7 +103,7 @@ const adminProducts = async (req, res) => {
   
   // Handle product editing
   const editProductModal = async (req, res) => {
-    console.log("Editing product...");
+   
     
     try {
         const productId = req.params.id;
@@ -136,7 +136,7 @@ const adminProducts = async (req, res) => {
        
         await product.save();
   
-        res.status(200).json(product); // Send the updated product back
+        res.status(200).json(product); 
     } catch (error) {
         console.error('Error updating product:', error);
         res.status(500).send('Internal Server Error');
@@ -149,9 +149,9 @@ const adminProducts = async (req, res) => {
   const isProductListed = async (req, res) => {
     try {
       const productId = req.params.id;
-      const { isListed } = req.body; // Expecting a boolean value indicating the new state
+      const { isListed } = req.body; 
   
-      // Validate if isListed is provided and is a boolean
+      
       if (typeof isListed !== "boolean") {
         return res.status(400).json({
           success: false,
@@ -167,7 +167,7 @@ const adminProducts = async (req, res) => {
           .json({ success: false, message: "The product does not exist" });
       }
   
-      product.isListed = isListed; // Update the listing status
+      product.isListed = isListed; 
       await product.save();
   
       res.status(200).json({

@@ -1,7 +1,7 @@
 const couponSchema= require("../../model/couponModel")
 
 
-
+//to show availble coupons
 const availableCoupon =async (req, res) => {
     try {
         const availableCoupons = await couponSchema.find({ isActive: true });

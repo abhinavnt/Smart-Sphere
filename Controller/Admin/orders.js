@@ -126,13 +126,13 @@ const approveProductCancellation = async (req, res) => {
     item.cancellationRequested = false;
     
     
-    console.log(item.Status);
+    
     //to find the product fund
     const totalAmount=item.price*item.quantity
     if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
       item.Status = "Refund";
       await refundToWallet(order.userID,totalAmount,orderId,productId);
-      console.log(item.Status);
+      
   }
 
      await ProductsSchema.findByIdAndUpdate(
@@ -163,24 +163,24 @@ const approveProductReturn = async (req, res) => {
   const { orderId, productId } = req.params;
 
   try {
-      // Find the order
+      
       const order = await orderSchema.findById(orderId);
       if (!order) {
           return res.status(404).json({ message: "Order not found" });
       }
 
-      // Find the specific product in the order
+      
       const item = order.items.find(i => i.productID.toString() === productId);
       if (!item) {
           return res.status(404).json({ message: "Product not found in the order" });
       }
 
-      // Check if there is a return request pending
+      
       if (!item.returnRequested) {
           return res.status(400).json({ message: "No return request for this product" });
       }
 
-      // Update return status and handle refund if required
+      
       item.returned = true;
       item.Status = "Returned";
       item.returnRequested = false;
@@ -191,14 +191,14 @@ const approveProductReturn = async (req, res) => {
           await refundToWallet(order.userID, totalAmount, orderId, productId);
       }
 
-      // Update stock quantity
+      
       await ProductsSchema.findByIdAndUpdate(
           productId,
           { $inc: { stock: item.quantity } },
           { new: true }
       );
 
-      // Save the order with updated details
+      
       await order.save();
 
       res.status(200).json({ message: "Product return approved successfully." });

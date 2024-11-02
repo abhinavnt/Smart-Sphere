@@ -5,11 +5,11 @@ const mongoose = require("mongoose");
 
 const dashboardData = async (req, res) => {
     try {
-        // Get the selected period from query parameters
+       
         const period = req.query.period || 'monthly';
         let dateFilter;
 
-        // Set date filter based on the selected period
+       
         const now = new Date();
         switch (period) {
             case 'daily':

@@ -106,7 +106,7 @@ const editOffer = async (req, res) => {
 
     try {
         const result = await offerSchama.updateOne(
-            { _id: id }, // Query to find the document
+            { _id: id }, 
             {
                 $set: {
                     title,

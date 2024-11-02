@@ -27,16 +27,14 @@ const profile = async (req, res) => {
 
       const addresses = await addressSchema.find({ user: userId });
       
-      const wallet = await walletSchema.findOne(
-        { userId },
-        {
-            balance: 1, // Include balance field
-            transactions: { $slice: -6 } // Get only the latest 6 transactions
-        }
-    ) || { 
+      const wallet = await walletSchema.findOne({userId }) || { 
         balance: 0, 
         transactions: [] 
     };
+
+      const latestTransactions = wallet.transactions
+      .sort((a, b) => b.date - a.date) 
+      .slice(0,6);
       
       const page = parseInt(req.query.page) || 1; 
       const limit = 4; 
@@ -59,7 +57,10 @@ const profile = async (req, res) => {
           orders, 
           currentPage: page, 
           totalPages ,
-          wallet
+          wallet: {
+            balance: wallet.balance,
+            transactions: latestTransactions
+        }
       });
   } catch (err) {
       console.error(err);
@@ -135,7 +136,7 @@ const profile = async (req, res) => {
     }
   
     try {
-      // Update address fields
+      
       existingAddress.fullName = fullName;
       existingAddress.phone = phone;
       existingAddress.address = address;
