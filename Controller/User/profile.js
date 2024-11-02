@@ -27,7 +27,13 @@ const profile = async (req, res) => {
 
       const addresses = await addressSchema.find({ user: userId });
       
-      const wallet = await walletSchema.findOne({userId }) || { 
+      const wallet = await walletSchema.findOne(
+        { userId },
+        {
+            balance: 1, // Include balance field
+            transactions: { $slice: -6 } // Get only the latest 6 transactions
+        }
+    ) || { 
         balance: 0, 
         transactions: [] 
     };

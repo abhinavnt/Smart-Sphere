@@ -7,6 +7,7 @@ const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
 const offerSchema=require("../../model/offerModel")
+const walletSchema=require("../../model/walletModel")
 const saltRound = 10;
 require("dotenv").config();
 
@@ -71,6 +72,7 @@ const userLoging = async (req, res) => {
 //user Signup page
 const loadUserSignup = (req, res) => {
   const message = req.query.message;
+  req.session.refralcode=req.query.referralCode
   res.render("user/signup", { msg: message });
 };
 
@@ -86,10 +88,10 @@ const userSignupVerify = async (req, res) => {
     const { email, password } = req.body;
     console.log(req.body);
     console.log(email);
-    // req.flash('signupData', { email, password});
+    
 
     req.session.signupData = req.body;
-    // Check if the email already exists
+    
     const user = await userSchema.findOne({ email });
     if (user) {
       return res.redirect("/signup?message=email already exist");
@@ -99,12 +101,12 @@ const userSignupVerify = async (req, res) => {
     const genotp = Math.floor(1000 + Math.random() * 9000);
     console.log(genotp); // Log the OTP for debugging
 
-    // Configure the email transporter using nodemailer
+    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL, // Your email
-        pass: process.env.PASS, // Your email password
+        user: process.env.EMAIL,
+        pass: process.env.PASS, 
       },
     });
 
@@ -116,17 +118,16 @@ const userSignupVerify = async (req, res) => {
       text: `Your OTP for signup is ${genotp}. It will expire in 10 minutes.`,
     };
 
-    // Send the OTP via email
+
     await transporter.sendMail(mailOptions);
 
-    // Store OTP and expiration time in session
+
     req.session.otp = genotp;
     req.session.email = req.body;
-    req.session.otpExpires = Date.now() + 1 * 60 * 1000; // Set expiration time to 1 minute (60000 ms)
+    req.session.otpExpires = Date.now() + 1 * 60 * 1000; 
 
-    console.log(req.session.otp); // Log the session OTP for debugging
-
-    // Redirect to the OTP input page
+    console.log(req.session.otp);
+    
     res.redirect("/otp");
   } catch (error) {
     console.error(error);
@@ -188,7 +189,7 @@ const resendOTP = async (req, res) => {
 };
 
 //otp verification
-const verifyOTP = (req, res) => {
+const verifyOTP = async (req, res) => {
   const { otp1, otp2, otp3, otp4 } = req.body;
   const enteredOtp = otp1 + otp2 + otp3 + otp4;
 
@@ -206,6 +207,25 @@ const verifyOTP = (req, res) => {
 
   if (parseInt(enteredOtp) === req.session.otp) {
     const newUser = new userSchema({ username, email, password });
+    
+    if(req.session.refralcode){
+      const userId = req.session.refralcode
+      newUser.referredBy = userId
+      await walletSchema.findOneAndUpdate(
+          {userId},
+          {$inc : { balance : 200},
+      $push : {
+          transactions : {
+              type: 'credit', 
+              amount : 100 ,
+              description: 'Refferal Bonus '
+          }
+      }
+      },
+      { new: true, upsert: true } 
+      )                
+   }
+
     newUser
       .save()
       .then(() => {
@@ -475,10 +495,10 @@ const newpassVerify = async (req, res) => {
     // Hash the new password
     const hashPassword = await bcrypt.hash(password, saltRound);
 
-    // Update the existing user's password
+    
     await userSchema.updateOne(
-      { email: email }, // criteria to find the user
-      { $set: { password: hashPassword } } // update operation
+      { email: email },
+      { $set: { password: hashPassword } } 
     );
 
     console.log("Password updated successfully");

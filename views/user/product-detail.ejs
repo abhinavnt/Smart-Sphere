@@ -143,9 +143,15 @@
 	  
 				<!-- Stock and Availability -->
 				<div class="p-t-33">
-				  <p class="stext-102 cl3 p-b-5">
-					<%= product.stock > 0 ? 'In Stock' : 'Out of Stock' %>
-				  </p>
+					<p class="stext-102 cl3 p-b-5 <%= product.stock > 0 && product.stock < 10 ? 'text-danger' : '' %>">
+						<%= product.stock > 0 
+							? (product.stock < 10 
+								? `Only ${product.stock} left in stock!` 
+								: 'In Stock') 
+							: 'Out of Stock' 
+						%>
+					  </p>
+					  
 	  
 				  <!-- Only show "Add to Cart" button if product is listed and in stock -->
 				  <% if (product.isListed && product.stock > 0) { %>
