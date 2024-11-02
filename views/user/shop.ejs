@@ -519,7 +519,11 @@
 					text: response.data.message || 'Added to wishlist!',
 					icon: 'success',
 					confirmButtonText: 'OK'
-				});
+				}).then(() => {
+                if (window.fetchWishlistItemCount) {
+                    window.fetchWishlistItemCount();
+                }
+            });
 			})
 			.catch(error => {
 				Swal.fire({

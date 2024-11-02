@@ -206,11 +206,11 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const userId = window.userId; // Assuming you have userId stored in a global variable
+            const userId = window.userId; 
         
-            // Function to fetch cart items count
+            
             async function fetchCartItemCount() {
-                if (!userId) return; // Exit if userId is not available
+                if (!userId) return; 
         
                 try {
                     const response = await axios.get(`/cart/items-count/${userId}`);
@@ -221,20 +221,20 @@
                 }
             }
         
-            // Function to fetch wishlist items count
+           
             async function fetchWishlistItemCount() {
-                if (!userId) return; // Exit if userId is not available
+                if (!userId) return; 
         
                 try {
-                    const response = await axios.get(`/wishlist/items-count/${userId}`); // You need to create this route
+                    const response = await axios.get(`/wishlist/items-count/${userId}`); 
                     const itemCount = response.data.itemCount || 0;
                     document.querySelector('.icon-header-noti[data-notify]:last-child').setAttribute('data-notify', itemCount);
                 } catch (error) {
                     console.error('Error fetching wishlist item count:', error);
                 }
             }
-        
-            // Call the functions to fetch and update counts on page load
+            window.fetchCartItemCount=fetchCartItemCount
+            window.fetchWishlistItemCount = fetchWishlistItemCount;
             fetchCartItemCount();
             fetchWishlistItemCount();
         });

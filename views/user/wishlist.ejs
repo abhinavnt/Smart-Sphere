@@ -274,6 +274,9 @@
                     if (response.status === 200) {
                         Swal.fire('Removed!', 'The item has been removed from your wishlist.', 'success');
                         e.target.closest('.wishlist-item').remove();
+                        if (window.fetchWishlistItemCount) {
+                                window.fetchWishlistItemCount();
+                            }
                     } else {
                         Swal.fire('Oops!', response.data.message, 'error');
                     }
@@ -283,6 +286,9 @@
             }
         });
     });
+
+
+
 
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         button.addEventListener('click', async (e) => {

@@ -128,12 +128,11 @@ function createProductElement(product) {
 
 
 //add to cart
-
 document.querySelectorAll('.add-to-cart').forEach(button => {
 button.addEventListener('click', function() {
     const productId = this.getAttribute('data-id');
 
-    // Check product stock before adding to cart
+    
     checkStock(productId)
         .then(response => {
             if (response.inStock) {
@@ -144,11 +143,11 @@ button.addEventListener('click', function() {
                     productImage: this.getAttribute('data-image')
                 };
 
-                // Check if adding would exceed stock
+               
                 if (response.userQuantity < response.availableStock) {
                     addToCart(product)
                         .then(() => {
-                            // Check for limited stock after adding
+                           
                             if (response.userQuantity + 1 > 5) {
                                 showLimitedStockAlert(`You already have 5 in your cart.`);
                             }
@@ -177,9 +176,8 @@ return axios.post(`/cart/check-stock/${productId}`)
 }
 
 // Add to cart function
-
 const number = document.getElementById('btn.value')
-console.log(number);
+
 
 function addToCart(product) {
 const cartItem = {
@@ -193,6 +191,9 @@ const cartItem = {
 return axios.post(`/cart/add/${window.userId}`, cartItem)
     .then(response => {
         showSuccessAlert('Product added to cart successfully!');
+        if (window.fetchCartItemCount) {
+            window.fetchCartItemCount();
+        }
     })
     .catch(error => {
         console.error('Error adding to cart:', error);
@@ -229,9 +230,6 @@ Swal.fire({
     confirmButtonText:'OK'
 });
 } 
-
-
-
 
 
 // for sort and filters

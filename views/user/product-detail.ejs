@@ -516,7 +516,6 @@ function checkStock(productId) {
 // Add to cart function
 
 const number = document.getElementById('btn.value')
-console.log(number);
 
 function addToCart(product) {
     const cartItem = {
@@ -530,6 +529,9 @@ function addToCart(product) {
     return axios.post(`/cart/add/${window.userId}`, cartItem)
         .then(response => {
             showSuccessAlert('Product added to cart successfully!');
+			if (window.fetchCartItemCount) {
+                window.fetchCartItemCount();
+            }
         })
         .catch(error => {
             console.error('Error adding to cart:', error);
@@ -581,7 +583,11 @@ function showSuccessAlert(message) {
 				text: response.data.message || 'Added to wishlist!',
 				icon: 'success',
 				confirmButtonText: 'OK'
-			});
+			}).then(() => {
+                if (window.fetchWishlistItemCount) {
+                    window.fetchWishlistItemCount();
+                }
+            });
 		})
 		.catch(error => {
 			Swal.fire({
