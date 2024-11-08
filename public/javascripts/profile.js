@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
   viewOrderButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id");
-      console.log(orderId);
+      console.log("Order ID:", orderId);
 
       // Fetch order details using Axios
       axios
@@ -25,6 +25,21 @@ document.addEventListener("DOMContentLoaded", function () {
             "shippingAddress"
           ).innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address}, ${order.shippingAddress.pincode}`;
           document.getElementById("orderID").innerText = order.orderid;
+          document.getElementById("coupondiscount").innerText = order.couponDiscount?order.couponDiscount:0
+          document.getElementById("offerDiscount").innerText = order.offerDiscount?order.offerDiscount:0
+
+          // Check if any item has a Status of "Delivered" to display the "Download Invoice" button
+          const downloadInvoiceButton = document.getElementById("downloadInvoiceButton");
+          const hasDeliveredItem = order.items.some(item => item.Status === "Delivered");
+
+          if (hasDeliveredItem) {
+            downloadInvoiceButton.style.display = "inline-block";
+           
+          } else {
+            downloadInvoiceButton.style.display = "none";
+         
+          }
+
           // Create a container to hold product details with enhanced styling
           let productsHtml = "";
 
@@ -71,61 +86,95 @@ function downloadInvoice() {
   // Create a new jsPDF instance
   const pdf = new jsPDF("p", "mm", "a4");
 
-  // Add title
-  pdf.setFontSize(20);
+  // Set title font and add title with border
+  pdf.setFontSize(22);
+  pdf.setFont("helvetica", "bold");
   pdf.text("Invoice", 105, 20, { align: "center" });
+  pdf.setDrawColor(0);
+  pdf.setLineWidth(1);
+  pdf.rect(5, 5, 200, 287); // Border around the entire page
 
-  // Get the order details
+  // Get order details
   const orderId = document.getElementById("orderID").innerText;
   const orderedDate = document.getElementById("orderedDate").innerText;
   const orderStatus = document.getElementById("orderStatus").innerText;
   const shippingAddress = document.getElementById("shippingAddress").innerText;
   const totalAmount = document.getElementById("totalAmount").innerText;
+  const offerDiscount=document.getElementById("offerDiscount").innerText
+  const couponDiscount=document.getElementById("coupondiscount").innerText
 
-  // Add order info
-  pdf.setFontSize(12);
-  pdf.text(`Order ID: ${orderId}`, 10, 30);
-  pdf.text(`Ordered Date: ${orderedDate}`, 10, 40);
-  pdf.text(`Order Status: ${orderStatus}`, 10, 50);
-  pdf.text(`Shipping Address: ${shippingAddress}`, 10, 60);
+  // Add order info with background and spacing
+  pdf.setFontSize(12); 
+  pdf.setTextColor(40);
+  pdf.setFont("helvetica", "normal");
+  pdf.setFillColor(440, 440, 440);
+  pdf.rect(10, 30, 190, 25, 'F'); 
 
-  // Add a line break
-  pdf.text("", 10, 70);
+  pdf.text(`Order ID: ${orderId}`, 12, 40);
+  pdf.text(`Ordered Date: ${orderedDate}`, 12, 45);
+  pdf.text(`Order Status: ${orderStatus}`, 12, 50);
+  pdf.text(`Shipping Address: ${shippingAddress}`, 12, 55);
 
-  // Add table header
+  // Add table header with background color
   pdf.setFontSize(14);
-  pdf.text("Ordered Products", 10, 80);
-  pdf.setFontSize(12);
-  pdf.text("Product Name", 10, 90);
-  pdf.text("Price", 80, 90);
-  pdf.text("Quantity", 120, 90);
-  pdf.text("Total", 160, 90);
+  pdf.setTextColor(255);
+  pdf.setFillColor(50, 50, 150); // Darker background for table header
+  pdf.rect(10, 70, 190, 10, 'F');
+  pdf.text("Product Name", 12, 77);
+  pdf.text("Price", 80, 77);
+  pdf.text("Quantity", 120, 77);
+  pdf.text("Total", 160, 77);
 
-  // Get product details
+  // Get product details and add each product with lines
   const orderItems = [...document.querySelectorAll("#orderedProducts .card-body")];
-  let yPosition = 100;
+  let yPosition = 87;
+  pdf.setFontSize(12);
+  pdf.setTextColor(0);
 
-  orderItems.forEach(item => {
+  orderItems.forEach((item, index) => {
+    
+    
     const productName = item.querySelector(".card-title").innerText;
     const productPrice = item.querySelectorAll(".card-text")[0].innerText.replace('Price: ₹', '');
     const quantity = item.querySelectorAll(".card-text")[1].innerText.replace('Quantity: ', '');
     const total = (parseFloat(productPrice) * parseInt(quantity)).toFixed(2);
 
-    pdf.text(productName, 10, yPosition);
+    // Alternate row color for readability
+    if (index % 2 === 0) pdf.setFillColor(245, 245, 245);
+    else pdf.setFillColor(255, 255, 255);
+    pdf.rect(10, yPosition - 5, 190, 10, 'F');
+
+    pdf.text(productName, 12, yPosition);
     pdf.text(`${productPrice}`, 80, yPosition);
-    pdf.text(`${total}`, 160, yPosition);
     pdf.text(quantity, 120, yPosition);
+    pdf.text(`${total}`, 160, yPosition);
 
-    yPosition += 10; 
+    yPosition += 10;
   });
-
-  // Add total amount
+  
+  pdf.setFontSize(10);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(`coupon Discount: ${couponDiscount}`, 10, yPosition + 10);
+  pdf.text(`offer Discount: ${offerDiscount}`, 10, yPosition + 15);
+  pdf.text(`Delivery charge: 50`, 10, yPosition + 20);
+  
+ 
+   
+  // Add total amount with emphasis
   pdf.setFontSize(14);
-  pdf.text(`Total Amount ${totalAmount}`, 10, yPosition + 10);
+  pdf.setFont("helvetica", "bold");
+  pdf.text(`Total Amount: ${totalAmount}`, 10, yPosition + 25);
+
+  // Add footer
+  pdf.setFontSize(10);
+  pdf.setTextColor(100);
+  pdf.text("Thank you for your purchase!", 105, 285, { align: "center" });
+  pdf.text("Contact us for any questions regarding your order.", 105, 290, { align: "center" });
 
   // Save the PDF
   pdf.save(`Invoice_${orderId}.pdf`);
 }
+
 
 
 

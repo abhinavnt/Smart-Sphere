@@ -510,7 +510,7 @@
                           <% } else { %>
                               
                               <% if (item.Status === 'Returned') { %>
-                                 
+                                
                               <% } else { %>
                                   
                                   <% if (!item.cancelled && item.Status !== 'Delivered' && item.Status !== 'Cancelled') { %>
@@ -654,7 +654,12 @@
                     <h5 class="mb-3">
                       Status: <span id="orderStatus" class="fw-normal"></span>
                     </h5>
-
+                    <h5 class="mb-3">
+                      coupon discount: <span id="coupondiscount" class="fw-normal"></span>
+                    </h5>
+                    <h5 class="mb-3">
+                      Offer discount: <span id="offerDiscount" class="fw-normal"></span>
+                    </h5>
                     <h5 class="mb-2">Shipping Address:</h5>
                     <p id="shippingAddress" class="mb-4"></p>
 
@@ -674,13 +679,16 @@
                     >
                       Close
                     </button>
+
                     <button
                     type="button"
                     class="btn btn-primary"
+                    id="downloadInvoiceButton"
                     onclick="downloadInvoice()"
                   >
                     Download Invoice
                   </button>
+                  
                   </div>
                 </div>
               </div>
