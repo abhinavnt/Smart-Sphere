@@ -1,6 +1,7 @@
 const category = require("../../model/category");
 const orderSchema = require("../../model/orderModel");
 const ProductsSchema = require("../../model/productModel");
+const userSchema= require("../../model/userModel")
 const mongoose = require("mongoose");
 
 const dashboardData = async (req, res) => {
@@ -112,11 +113,14 @@ const dashboardData = async (req, res) => {
             { $sort: { totalSold: -1 } },
             { $limit: 10 }
         ]);
+        
+        const totalUsers= await userSchema.countDocuments()
 
         res.json({
             salesSummary: salesSummary[0] || { totalSalesCount: 0, totalRevenue: 0, totalDiscount: 0 },
             bestSellingProducts,
-            bestSellingCategories
+            bestSellingCategories,
+            totalUsers
         });
     } catch (error) {
         console.error("Error fetching dashboard data:", error);

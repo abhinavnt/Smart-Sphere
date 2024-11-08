@@ -42,7 +42,7 @@ const cart = async (req, res) => {
 
     for (const item of cartItem.items) {
       const product = await ProductsSchema
-        .findOne({ _id: item.productId, isListed: true })
+        .findOne({ _id: item.productId})
         .lean();
 
       if (product) {

@@ -64,11 +64,11 @@ const profile = async (req, res) => {
       });
   } catch (err) {
       console.error(err);
-      res.status(500).json({ success: false, message: "Failed to fetch user details" });
+      res.status(500).render("500")
   }
 };
 
-  
+ 
   // to add new address
   const addAddress = async (req, res) => {
     const {

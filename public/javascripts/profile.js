@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", function () {
                   <div class="card-body">
                     <h6 class="card-title">${item.productID.name}</h6>
                     <div class="d-flex justify-content-between">
-                      <p class="card-text mb-1">Price: ₹${item.productID.price}</p>
+                      <p class="card-text mb-1">Price: ₹${item.price}</p>
                       <p class="card-text mb-1">Quantity: ${item.quantity}</p>
                     </div>
                   </div>

@@ -25,14 +25,14 @@
     }
     .view-report-btn {
         padding: 10px 20px;
-        background-color: #6d60e4;
+        background-color: #ff3366;
         color: white;
         border: none;
         border-radius: 5px;
         cursor: pointer;
     }
     .view-report-btn:hover {
-        background-color: #422feb;
+        background-color: #ed053f;
     }
     .chart-row {
         display: flex;
@@ -53,9 +53,48 @@
         text-align: center;
     }
     th {
-        background-color: #6d60e4;
+        background-color: #8d3c50;
         color: white;
     }
+
+
+    .custom-dropdown {
+            position: relative;
+            display: inline-block;
+            width: 250px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .custom-dropdown select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding: 12px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+            background-color: #f0f0f0;
+            border: 2px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .custom-dropdown select:hover {
+            border-color: #ff4757;
+        }
+
+        .custom-dropdown::after {
+            content: "▼";
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: #333;
+            pointer-events: none;
+        }
 </style>
 <body>
     <!-- Sidebar -->
@@ -74,17 +113,17 @@
             </div>
             <div class="report-card">
                 <h3>Total Revenue</h3>
-                <p id="totalRevenue">$0.00</p>
+                <p id="totalRevenue">0.00</p>
             </div>
             <div class="report-card">
-                <h3>Total Discounts</h3>
-                <p id="totalDiscount">$0.00</p>
+                <h3>Total Users</h3>
+                <p id="totalDiscount">0</p>
             </div>
         </div>
         <button class="view-report-btn" onclick="window.location.href='/admin/sales-report'">View Sales Report</button>
 
         <!-- Time Period Filter -->
-        <div>
+        <div class="custom-dropdown">
             <label for="timePeriodFilter">Select Period:</label>
             <select id="timePeriodFilter" onchange="updateDashboardData()">
                 <option value="yearly">Yearly</option>
@@ -140,23 +179,23 @@
             const period = document.getElementById('timePeriodFilter').value;
             try {
                 const response = await axios.get(`/admin/dashboard-data?period=${period}`);
-                const { salesSummary, bestSellingProducts, bestSellingCategories } = response.data;
+                const { salesSummary, bestSellingProducts, bestSellingCategories,totalUsers } = response.data;
 
                 console.log("Dashboard Data:", response.data);
 
-                // Update Sales Summary
+                
                 document.getElementById('totalSalesCount').innerText = salesSummary.totalSalesCount || 0;
                 document.getElementById('totalRevenue').innerText = `${(salesSummary.totalRevenue || 0).toFixed(2)}`;
-                document.getElementById('totalDiscount').innerText = `${(salesSummary.totalDiscount || 0).toFixed(2)}`;
+                document.getElementById('totalDiscount').innerText = `${(totalUsers || 0)}`;
 
-                // Update Charts for Total Sales and Revenue
+                
                 updateTotalSalesChart(salesSummary.totalSalesCount || 0);
                 updateTotalRevenueChart(salesSummary.totalRevenue || 0);
 
-                // Update Best Selling Products Table
+                
                 updateTable('bestSellingProductsTable', bestSellingProducts);
 
-                // Update Best Selling Categories Table
+                
                 updateTable('bestSellingCategoriesTable', bestSellingCategories);
             } catch (error) {
                 console.error("Error fetching dashboard data:", error);
@@ -166,12 +205,12 @@
         function updateTotalSalesChart(totalSales) {
             const ctx = document.getElementById('totalSalesChart').getContext('2d');
             
-            // Destroy previous chart instance if it exists to avoid overlap
+            
             if (totalSalesChart) {
                 totalSalesChart.destroy();
             }
 
-            // Create a new chart for Total Sales
+            
             totalSalesChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -198,12 +237,12 @@
         function updateTotalRevenueChart(totalRevenue) {
             const ctx = document.getElementById('totalRevenueChart').getContext('2d');
             
-            // Destroy previous chart instance if it exists to avoid overlap
+            
             if (totalRevenueChart) {
                 totalRevenueChart.destroy();
             }
 
-            // Create a new chart for Total Revenue
+            
             totalRevenueChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -229,14 +268,14 @@
 
         function updateTable(tableId, data) {
             const tableBody = document.getElementById(tableId).querySelector('tbody');
-            tableBody.innerHTML = ''; // Clear existing rows
+            tableBody.innerHTML = '';
 
             data.forEach(item => {
                 const row = document.createElement('tr');
                 const cell1 = document.createElement('td');
                 const cell2 = document.createElement('td');
 
-                // Use 'name' or 'categoryName' if available; fallback to '_id'
+               
                 cell1.innerText = item.name || item.categoryName || item._id;
                 cell2.innerText = item.totalSold;
 
@@ -246,7 +285,7 @@
             });
         }
 
-        // Initial data load
+       
         updateDashboardData();
     </script>
 </body>

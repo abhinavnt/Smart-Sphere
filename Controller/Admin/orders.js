@@ -100,7 +100,7 @@ const changeItemStatus = (req, res) => {
 //approve cancelltion
 const approveProductCancellation = async (req, res) => {
   const { orderId, productId } = req.params;
-  console.log("hai");
+
 
   try {
     const order = await orderSchema.findById(orderId);

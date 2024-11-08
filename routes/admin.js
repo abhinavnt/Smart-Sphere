@@ -23,7 +23,7 @@ router.get("/logout", adminController.logoutAdmin);
 //----------------------------------------------------------------dashBoard------------------------------------------------------------------------
 
 //admin dasboard
-router.get("/dashboard",adminController.adminDashBoard);
+router.get("/dashboard",adminAuth.checkAdminSession,adminController.adminDashBoard);
 //admin user management
 router.get("/users", adminAuth.checkAdminSession, adminController.adminUser);
 //admin user block

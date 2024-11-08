@@ -271,7 +271,7 @@
     try {
         const response = await axios.get(`/admin/sales-report/download/${format}`, {
             params: { startDate, endDate, frequency },
-            responseType: 'blob' // Important to set for file downloads
+            responseType: 'blob' 
         });
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -280,7 +280,7 @@
         link.setAttribute('download', `sales-report.${format === 'pdf' ? 'pdf' : 'xlsx'}`);
         document.body.appendChild(link);
         link.click();
-        link.remove(); // Clean up the link element
+        link.remove(); 
     } catch (error) {
         console.error('Error downloading report:', error);
     }
@@ -293,9 +293,9 @@
     const dateInputs = document.getElementById('dateInputs');
 
     if (frequency === 'custom') {
-        dateInputs.style.display = 'flex'; // Show date inputs
+        dateInputs.style.display = 'flex'; 
     } else {
-        dateInputs.style.display = 'none'; // Hide date inputs
+        dateInputs.style.display = 'none'; 
     }
 }
 

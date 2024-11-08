@@ -1,16 +1,30 @@
+const userSchema= require("../model/userModel")
+
+
+
 //User session check login
-const checkUserSession=(req,res,next)=>{
-    if(req.session.user){
+const checkUserSession=async (req,res,next)=>{
+    const userId= req.session.user._id
+    console.log("sdfklhakjfhdkjg",userId);
+    
+    const isBlocked= await userSchema.findById(userId)
+    console.log(isBlocked.isBlocked);
+    
+    if(req.session.user && !isBlocked.isBlocked ){
         next()
     }else{
         res.redirect('/login')
     }
 }
 
-
+ 
 //check is user logged
-const isUserLogged=(req,res,next)=>{
-    if(req.session.user){
+const isUserLogged= async (req,res,next)=>{
+    const userId= req.session.user ? req.session.user._id : null
+    
+    const isBlocked= await userSchema.findById(userId)
+
+    if(req.session.user && !isBlocked.isBlocked){
         res.redirect('/')
     }else{
        next() 

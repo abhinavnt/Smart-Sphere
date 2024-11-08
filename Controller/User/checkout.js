@@ -25,7 +25,7 @@ const razorpay = new Razorpay({
 // checkout page rander
 const checkout = async (req, res) => {
 
-    const userId = req.params.id;
+    const userId = req.session.user._id;
 
     const addresses = await addressSchema.find({ user: userId });
 
@@ -45,7 +45,7 @@ const checkout = async (req, res) => {
     }
 
     let cartSubtotal = 0;
-    let discount = 0; 
+    let discount = req.session.couponDiscound ? req.session.couponDiscound :0 
     let deliveryFee = 50; 
     const populatedCartItems = [];
 
@@ -221,7 +221,6 @@ const placeOrder = async (req, res) => {
 
 
 
-
 // order conformation
 const conformationOrder = async (req, res) => {
     try {
@@ -281,7 +280,7 @@ const handleRazorpayPayment = async (req, res) => {
         const {orderId}=req.body
         console.log("gaihouijejwhs",id);
         
-        const order = await orderSchema.findOne({ razorpayOrderId: orderId });
+        const order = await orderSchema.findOne({ _id: id });
         console.log("hai",order)
         
         if (order) {
@@ -289,6 +288,18 @@ const handleRazorpayPayment = async (req, res) => {
             console.log( order.paymentStatus);
             
             order.razorpayPaymentId = req.body.paymentId; 
+            
+            if(order.paymentfailcount<1){
+            for (const item of order.items) {
+                const product = await ProductsSchema.findById(item.productID);
+                order.paymentfailcount=1  
+                if (product) {
+                    product.stock += item.quantity;
+                    await product.save(); 
+                }
+            }
+        }
+
 
             await order.save();
             return res.status(200).json({ message: 'Payment failure handled successfully.' });
@@ -303,13 +314,32 @@ const handleRazorpayPayment = async (req, res) => {
 
 //paymentSucess
 const paymentSucess =async (req, res) => {
+    console.log("beham redy avvv monmwelkjdfj");
     try {
         const { orderId } = req.params;
         const { paymentId } = req.body;
 
         
-        await orderSchema.findByIdAndUpdate(orderId, { paymentStatus: 'Success' });
+        const order = await orderSchema.findByIdAndUpdate(orderId, { paymentStatus: 'Success' });
+        console.log(order,"ok ann okk here hai ethitund ivide come on "); 
 
+
+      
+        
+          
+            if(order.paymentfailcount>=1){
+                console.log("hai hello");
+                
+            for (const item of order.items) {
+                const product = await ProductsSchema.findById(item.productID);
+                if (product) {
+                    product.stock -= item.quantity;
+                    await product.save()
+                }
+            }
+        } 
+    
+  
         res.status(200).json({ message: 'Payment successful', paymentId });
     } catch (error) {
         console.error('Error updating payment status:', error);

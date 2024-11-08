@@ -211,7 +211,7 @@ const product_detail = async (req, res) => {
 
   } catch (error) {
       console.error(error);
-      res.status(500).json({ message: 'Server error' });
+      res.status(500).render('404')
 }
 };
 

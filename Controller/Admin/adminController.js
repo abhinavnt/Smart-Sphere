@@ -91,9 +91,9 @@ const isBlock = async (req, res) => {
     }
     User.isBlocked = isBlocked;
     console.log(User.isBlocked);
-    if(isBlocked){
-      req.session.user=null
-    }
+    // if(isBlocked){
+    //   req.session.user=null
+    // } 
     await User.save();
     res.status(200).json({
       success: true,

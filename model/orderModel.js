@@ -81,8 +81,13 @@ const orderSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     },
+    paymentfailcount:{ 
+        type: Number, 
+        required: false,
+         default: 0
+    }
     
-   
+     
 },{timestamps:true});
 
 module.exports = mongoose.model('Order',orderSchema);

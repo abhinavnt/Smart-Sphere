@@ -35,7 +35,6 @@ router.get("/", userController.renderHome)
 //----------------------------------------------------------------product details------------------------------------------------------------------------
 
 router.get("/product-detail/:id",shopController.product_detail)
-
 router.get('/logout',userAuth.checkUserSession,userController.logout)
 
 //----------------------------------------------------------------------forgot password----------------------------------------------------------
@@ -72,11 +71,10 @@ router.post('/cart/add/:id',userAuth.checkUserSession,cartController.addCart)
 router.post('/cart/check-stock/:id',userAuth.checkUserSession,cartController.check_stock)
 router.patch('/cart/remove/:id',userAuth.checkUserSession,cartController.removeCart)
 router.patch('/cart/update/:userId',userAuth.checkUserSession,cartController.updateCart)
-
 router.get('/cart/items-count/:userId',cartController.cartCount);
 
 //-------------------------------------------------------------checkout-------------------------------------------------------------------------------
-router.get('/checkout/:id',userAuth.checkUserSession,checkoutcontroller.checkout)
+router.get('/checkout',userAuth.checkUserSession,checkoutcontroller.checkout)
 router.post('/checkout/submit/:id',userAuth.checkUserSession,checkoutcontroller.placeOrder)
 router.get('/order/confirmation/:orderId',userAuth.checkUserSession,checkoutcontroller.conformationOrder)
 router.post('/cart/applyCoupon',checkoutcontroller.applyCoupon)

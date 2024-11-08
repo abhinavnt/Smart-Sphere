@@ -47,13 +47,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const productId = item.querySelector('.remove-item').getAttribute('data-productId'); // Get item ID
 		console.log(itemId);
 		
-        // Handle increase quantity
         increaseButton.addEventListener('click', async () => {
 			
             let currentQuantity = parseInt(quantityInput.value);
             const availableStock = await checkStock(productId);
 
-            // Check conditions before updating quantity
             if (currentQuantity <= 5 && currentQuantity <= availableStock) {
 				console.log(itemId);
 				
@@ -84,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update total price when quantity changes
         quantityInput.addEventListener('input', () => {
             let currentQuantity = parseInt(quantityInput.value);
             if (isNaN(currentQuantity) || currentQuantity < 1) {
@@ -114,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
             item.querySelector('.column-5').textContent = '₹' + itemTotal
         });
 
-        // Update the cart total display
         document.querySelector('.mtext-110.cl2').textContent = '₹' + cartTotal
     }
 
