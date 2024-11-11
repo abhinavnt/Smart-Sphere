@@ -145,7 +145,7 @@
                                 <td><%= new Date(order.orderDate).toLocaleDateString() %></td>
                                 <td>
                                     <div class="action-buttons">
-                                        <% if (item.Status !== 'Cancelled') { %>
+                                        <% if (item.Status != 'Cancelled') { %>
                                             <select class="form-control" onchange="changeItemStatus('<%= order._id %>', '<%= item.productID %>', this.value)">
                                                 <option value="Pending" <%= item.Status === 'Pending' ? 'selected' : '' %>>Pending</option>
                                                 <option value="Processing" <%= item.Status === 'Processing' ? 'selected' : '' %>>Processing</option>

@@ -165,6 +165,10 @@ button.addEventListener('click', function() {
 });
 });
 
+
+
+
+
 // Check product stock function
 function checkStock(productId) {
 return axios.post(`/cart/check-stock/${productId}`)

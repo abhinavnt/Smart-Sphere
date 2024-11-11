@@ -120,8 +120,6 @@ const checkout = async (req, res) => {
 
 
 
-
-
 // to place the order
 const placeOrder = async (req, res) => {
     try {

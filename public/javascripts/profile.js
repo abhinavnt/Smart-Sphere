@@ -177,8 +177,6 @@ function downloadInvoice() {
 
 
 
-
-
 // Function to cancel a specific product
 document.addEventListener("DOMContentLoaded", function () {
   const cancelProductButtons = document.querySelectorAll(".cancelProduct");

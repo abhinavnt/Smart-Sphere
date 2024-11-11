@@ -77,8 +77,7 @@ const cart = async (req, res) => {
 const addCart = async (req, res) => {
   const { productId, name, price, quantity, imageUrl } = req.body;
   const user = req.session.user ? req.session.user._id : null;
-  console.log("here is the product",productId);
-
+  
   try {
     const product = await ProductsSchema.findById(productId);
     if (!product) {
