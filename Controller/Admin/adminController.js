@@ -22,19 +22,24 @@ const adminLogin = async (req, res) => {
     const admin = await adminSchema.findOne({ email });
 
     if (!admin) {
-      return res.status(400).json({ success: false, message: "Admin not found" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Admin not found" });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
     if (!isMatch) {
-      return res.status(400).json({ success: false, message: "Password incorrect" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Password incorrect" });
     }
 
     req.session.admin = true;
-    return res.status(200).json({ success: true }); 
+    return res.status(200).json({ success: true });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ success: false, message: "Sorry, something went wrong" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Sorry, something went wrong" });
   }
 };
 
@@ -43,16 +48,12 @@ const adminDashBoard = (req, res) => {
   res.render("admin/dashboard");
 };
 
-
 const logoutAdmin = (req, res) => {
-  req.session.admin=false
+  req.session.admin = false;
   res.redirect("/admin/login");
 };
 
-
-
 //-------------------------------------------------------------Admin user-------------------------------------------------------------------
-
 
 //admin user
 const adminUser = async (req, res) => {
@@ -61,16 +62,12 @@ const adminUser = async (req, res) => {
     const limit = 10;
     const skip = (page - 1) * limit;
 
-    
     const totalUsers = await userSchema.countDocuments();
 
-    
     const users = await userSchema.find().skip(skip).limit(limit);
 
-    
     const totalPages = Math.ceil(totalUsers / limit);
 
-   
     res.render("admin/user", { users, currentPage: page, totalPages });
   } catch (error) {
     console.error("Error fetching users:", error);
@@ -86,14 +83,14 @@ const isBlock = async (req, res) => {
     const User = await userSchema.findById(userId);
     if (!User) {
       return res
-      .status(404)
-      .json({ success: false, message: "The user is not exists" });
+        .status(404)
+        .json({ success: false, message: "The user is not exists" });
     }
     User.isBlocked = isBlocked;
-    console.log(User.isBlocked);
+
     // if(isBlocked){
     //   req.session.user=null
-    // } 
+    // }
     await User.save();
     res.status(200).json({
       success: true,
@@ -105,15 +102,11 @@ const isBlock = async (req, res) => {
   }
 };
 
-
-
-
-
 module.exports = {
   loadAdminLogin,
   adminLogin,
   adminDashBoard,
   adminUser,
   isBlock,
-  logoutAdmin
+  logoutAdmin,
 };

@@ -6,26 +6,18 @@ const categorySchema = require("../../model/category");
 const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
-const CartSchema=require("../../model/cartModel")
+const CartSchema = require("../../model/cartModel");
 const saltRound = 10;
 require("dotenv").config();
 
-
-
-
-
-
 // to rener cart page
 const cart = async (req, res) => {
- 
-  const user = req.session.user._id
-     console.log(user);
-   
+  const user = req.session.user._id;
+
   const pages = 5;
   const page = parseInt(req.query.page) || 1;
 
   if (!mongoose.Types.ObjectId.isValid(user)) {
-    console.log("Invalid userId:", user);
     return res.status(400).send("Invalid user ID");
   }
 
@@ -41,9 +33,9 @@ const cart = async (req, res) => {
     let validItems = [];
 
     for (const item of cartItem.items) {
-      const product = await ProductsSchema
-        .findOne({ _id: item.productId})
-        .lean();
+      const product = await ProductsSchema.findOne({
+        _id: item.productId,
+      }).lean();
 
       if (product) {
         validItems.push(item);
@@ -60,7 +52,11 @@ const cart = async (req, res) => {
   const totalItems = await CartSchema.countDocuments({ userId: user });
   const totalPages = Math.ceil(totalItems / pages);
 
-  const cart = await CartSchema.findOneAndUpdate({ userId: user },{totalPrice:cartTotal},{new:true})
+  const cart = await CartSchema.findOneAndUpdate(
+    { userId: user },
+    { totalPrice: cartTotal },
+    { new: true }
+  );
 
   res.render("user/shopingCart", {
     user: req.session.user || null,
@@ -71,13 +67,11 @@ const cart = async (req, res) => {
   });
 };
 
-
-
 //add to cart
 const addCart = async (req, res) => {
   const { productId, name, price, quantity, imageUrl } = req.body;
   const user = req.session.user ? req.session.user._id : null;
-  
+
   try {
     const product = await ProductsSchema.findById(productId);
     if (!product) {
@@ -103,7 +97,6 @@ const addCart = async (req, res) => {
     }
 
     const totalRequestedQuantity = currentCartQuantity + quantity;
-
 
     if (totalRequestedQuantity > product.stock) {
       return res.status(400).json({
@@ -140,84 +133,72 @@ const addCart = async (req, res) => {
 
 //check stock
 const check_stock = async (req, res) => {
-    try {
-      const productId = req.params.id;
-  
-      
-      if (!req.session || !req.session.user) {
-        return res.status(401).json({ message: "User not logged in" });
-      }
-  
-      const userId = req.session.user._id;  
-      console.log(productId);
-  
-      const product = await ProductsSchema.findById(productId);
-  
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-  
-      const cart = await CartSchema.findOne({ userId });
-      let userQuantity = 0;
-  
-      if (cart) {
-        const item = cart.items.find(
-          (item) => item.productId.toString() === productId
-        );
-        if (item) {
-          userQuantity = item.quantity; 
-        }
-      }
-  
-      if (product.stock <= 0) {
-        return res.status(200).json({
-          inStock: false,
-          userQuantity,
-          availableStock: 0,
-        });
-      } else {
-        return res.status(200).json({
-          inStock: true,
-          userQuantity,
-          availableStock: product.stock,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
+  try {
+    const productId = req.params.id;
+
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ message: "User not logged in" });
     }
-  };
-  
+
+    const userId = req.session.user._id;
+
+    const product = await ProductsSchema.findById(productId);
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const cart = await CartSchema.findOne({ userId });
+    let userQuantity = 0;
+
+    if (cart) {
+      const item = cart.items.find(
+        (item) => item.productId.toString() === productId
+      );
+      if (item) {
+        userQuantity = item.quantity;
+      }
+    }
+
+    if (product.stock <= 0) {
+      return res.status(200).json({
+        inStock: false,
+        userQuantity,
+        availableStock: 0,
+      });
+    } else {
+      return res.status(200).json({
+        inStock: true,
+        userQuantity,
+        availableStock: product.stock,
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 
 // remove from cart
-
 const removeCart = async (req, res) => {
-  const user = req.params.id; 
+  const user = req.params.id;
   const itemId = req.body.itemId;
-  
-  console.log(itemId);
 
   if (
     !mongoose.Types.ObjectId.isValid(user) ||
     !mongoose.Types.ObjectId.isValid(itemId)
   ) {
-    
     return res.status(400).send("Invalid user or item ID");
   }
 
   try {
-    
     const cart = await CartSchema.findOne({ userId: user });
-    console.log(cart);
 
     if (cart) {
-      
       cart.items = cart.items.filter((item) => item._id.toString() !== itemId);
 
-      
       await cart.save();
 
-      
       res
         .status(200)
         .json({ success: true, message: "Item removed from cart" });
@@ -229,7 +210,6 @@ const removeCart = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
 
 // increse and decrease cart items
 const updateCart = async (req, res) => {
@@ -250,7 +230,7 @@ const updateCart = async (req, res) => {
     );
 
     if (itemIndex !== -1) {
-      cart.items[itemIndex].quantity = quantity; 
+      cart.items[itemIndex].quantity = quantity;
 
       await cart.save();
 
@@ -268,33 +248,27 @@ const updateCart = async (req, res) => {
   }
 };
 
+const cartCount = async (req, res) => {
+  const { userId } = req.params;
 
+  try {
+    const cart = await CartSchema.findOne({ userId });
 
-const cartCount=  async (req, res) => {
-    const { userId } = req.params;
-    
-    try {
-        const cart = await CartSchema.findOne({ userId });
-        
-        const itemCount = cart ? cart.items.length : 0; 
-        
-        res.status(200).json({ itemCount });
-    } catch (error) {
-        console.error('Error fetching cart item count:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-}
+    const itemCount = cart ? cart.items.length : 0;
 
+    res.status(200).json({ itemCount });
+  } catch (error) {
+    console.error("Error fetching cart item count:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
+module.exports = {
+  cart,
+  updateCart,
+  removeCart,
+  check_stock,
+  addCart,
 
-
-module.exports={
-    cart,
-    updateCart,
-    removeCart,
-    check_stock,
-    addCart,
-
-    cartCount
-
-}
+  cartCount,
+};

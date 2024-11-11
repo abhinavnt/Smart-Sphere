@@ -6,8 +6,8 @@ const categorySchema = require("../../model/category");
 const ProductsSchema = require("../../model/productModel");
 const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
-const offerSchema=require("../../model/offerModel")
-const walletSchema=require("../../model/walletModel")
+const offerSchema = require("../../model/offerModel");
+const walletSchema = require("../../model/walletModel");
 const saltRound = 10;
 require("dotenv").config();
 
@@ -16,7 +16,6 @@ require("dotenv").config();
 //user login page load
 const loadUserLogin = (req, res) => {
   const message = req.query.message;
-  console.log(message);
 
   res.render("user/login", { msg: message });
 };
@@ -28,7 +27,6 @@ const userLoging = async (req, res) => {
     const user = await userSchema.findOne({ email });
 
     if (!user) {
-      
       return res.status(400).json({
         success: false,
         message: "User not found",
@@ -53,15 +51,13 @@ const userLoging = async (req, res) => {
 
     // If login is successful
     req.session.user = user;
-    console.log(req.session.user);
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      redirectUrl: "/", 
+      redirectUrl: "/",
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Something went wrong, please try again later",
@@ -72,7 +68,7 @@ const userLoging = async (req, res) => {
 //user Signup page
 const loadUserSignup = (req, res) => {
   const message = req.query.message;
-  req.session.refralcode=req.query.referralCode
+  req.session.refralcode = req.query.referralCode;
   res.render("user/signup", { msg: message });
 };
 
@@ -86,12 +82,9 @@ const otprender = (req, res) => {
 const userSignupVerify = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(req.body);
-    console.log(email);
-    
 
     req.session.signupData = req.body;
-    
+
     const user = await userSchema.findOne({ email });
     if (user) {
       return res.redirect("/signup?message=email already exist");
@@ -101,12 +94,11 @@ const userSignupVerify = async (req, res) => {
     const genotp = Math.floor(1000 + Math.random() * 9000);
     console.log(genotp); // Log the OTP for debugging
 
-    
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL,
-        pass: process.env.PASS, 
+        pass: process.env.PASS,
       },
     });
 
@@ -118,19 +110,16 @@ const userSignupVerify = async (req, res) => {
       text: `Your OTP for signup is ${genotp}. It will expire in 10 minutes.`,
     };
 
-
     await transporter.sendMail(mailOptions);
-
 
     req.session.otp = genotp;
     req.session.email = req.body;
-    req.session.otpExpires = Date.now() + 1 * 60 * 1000; 
+    req.session.otpExpires = Date.now() + 1 * 60 * 1000;
 
     console.log(req.session.otp);
-    
+
     res.redirect("/otp");
   } catch (error) {
-    console.error(error);
     res.send("Something went wrong");
   }
 };
@@ -147,11 +136,9 @@ const resendOTP = async (req, res) => {
       );
     }
 
-    // Generate a new OTP
     const newOtp = Math.floor(1000 + Math.random() * 9000);
     console.log(`New OTP: ${newOtp}`);
 
-    // Resend OTP via email
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -169,11 +156,9 @@ const resendOTP = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    // Update session with new OTP and reset expiration
     req.session.otp = newOtp;
-    req.session.otpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes expiration
+    req.session.otpExpires = Date.now() + 10 * 60 * 1000;
 
-    // Reset the countdown timer in session storage
     res.setHeader("Content-Type", "text/html");
     res.write(`
       <script>
@@ -183,7 +168,6 @@ const resendOTP = async (req, res) => {
     `);
     res.end();
   } catch (error) {
-    console.error("Error resending OTP:", error);
     res.redirect("/otp?message=Something went wrong while resending OTP.");
   }
 };
@@ -207,24 +191,25 @@ const verifyOTP = async (req, res) => {
 
   if (parseInt(enteredOtp) === req.session.otp) {
     const newUser = new userSchema({ username, email, password });
-    
-    if(req.session.refralcode){
-      const userId = req.session.refralcode
-      newUser.referredBy = userId
+
+    if (req.session.refralcode) {
+      const userId = req.session.refralcode;
+      newUser.referredBy = userId;
       await walletSchema.findOneAndUpdate(
-          {userId},
-          {$inc : { balance : 200},
-      $push : {
-          transactions : {
-              type: 'credit', 
-              amount : 100 ,
-              description: 'Refferal Bonus '
-          }
-      }
-      },
-      { new: true, upsert: true } 
-      )                
-   }
+        { userId },
+        {
+          $inc: { balance: 200 },
+          $push: {
+            transactions: {
+              type: "credit",
+              amount: 100,
+              description: "Refferal Bonus ",
+            },
+          },
+        },
+        { new: true, upsert: true }
+      );
+    }
 
     newUser
       .save()
@@ -243,7 +228,6 @@ const verifyOTP = async (req, res) => {
         res.end();
       })
       .catch((err) => {
-        console.error(err);
         res.redirect("/signup?message=Error creating user.");
       });
   } else {
@@ -257,58 +241,70 @@ const renderHome = async (req, res) => {
   const products2 = await ProductsSchema.find({ isListed: true })
     .limit(12)
     .populate("categoryID");
-   
-    const productOffers = await offerSchema.find({
-      isActive: true,
-      targetType: 'Product',
-      selectedProducts: { $in: products2.map(p => p._id) }
-  }).populate('selectedProducts');
-   
-  const categoryIDs = products2.map(p => p.categoryID); 
 
-  const categoryOffers = await offerSchema.find({
+  const productOffers = await offerSchema
+    .find({
       isActive: true,
-      targetType: 'Category',
-      selectedCategory: { $in: categoryIDs }
-  }).populate('selectedCategory');
-  
-  
-    const products = products2.map(product => {
-        const productOffer = productOffers.find(offer => 
-            offer.selectedProducts.some(selectedId => selectedId.equals(product._id))
-        );
-  
-        const categoryOffer = categoryOffers.find(offer => 
-            offer.selectedCategory.some(selectedCat => selectedCat.equals(product.categoryID))
-        );
-  
-        const originalPrice = product.price;
-        let discountedPrice = originalPrice; 
-  
-        if (productOffer) {
-            discountedPrice = Math.round(originalPrice - (originalPrice * (productOffer.discountAmount / 100)));
-        } else if (categoryOffer) {
-            discountedPrice = Math.round(originalPrice - (originalPrice * (categoryOffer.discountAmount / 100)));
-        }
-  
-        return {
-            _id: product._id,
-            name: product.name,
-            price: originalPrice,
-            description: product.description,
-            images: product.images,
-            stock: product.stock,
-            colors: product.colors,
-            rating: product.rating,
-            category: product.categoryID ? product.categoryID.name : 'Unknown',
-            offer: discountedPrice < originalPrice ? {
-                discountedPrice,
-                hasOffer: true
-            } : { hasOffer: false }
-        };
-    });
-  
+      targetType: "Product",
+      selectedProducts: { $in: products2.map((p) => p._id) },
+    })
+    .populate("selectedProducts");
 
+  const categoryIDs = products2.map((p) => p.categoryID);
+
+  const categoryOffers = await offerSchema
+    .find({
+      isActive: true,
+      targetType: "Category",
+      selectedCategory: { $in: categoryIDs },
+    })
+    .populate("selectedCategory");
+
+  const products = products2.map((product) => {
+    const productOffer = productOffers.find((offer) =>
+      offer.selectedProducts.some((selectedId) =>
+        selectedId.equals(product._id)
+      )
+    );
+
+    const categoryOffer = categoryOffers.find((offer) =>
+      offer.selectedCategory.some((selectedCat) =>
+        selectedCat.equals(product.categoryID)
+      )
+    );
+
+    const originalPrice = product.price;
+    let discountedPrice = originalPrice;
+
+    if (productOffer) {
+      discountedPrice = Math.round(
+        originalPrice - originalPrice * (productOffer.discountAmount / 100)
+      );
+    } else if (categoryOffer) {
+      discountedPrice = Math.round(
+        originalPrice - originalPrice * (categoryOffer.discountAmount / 100)
+      );
+    }
+
+    return {
+      _id: product._id,
+      name: product.name,
+      price: originalPrice,
+      description: product.description,
+      images: product.images,
+      stock: product.stock,
+      colors: product.colors,
+      rating: product.rating,
+      category: product.categoryID ? product.categoryID.name : "Unknown",
+      offer:
+        discountedPrice < originalPrice
+          ? {
+              discountedPrice,
+              hasOffer: true,
+            }
+          : { hasOffer: false },
+    };
+  });
 
   if (req.session.user) {
     res.render("user/home", { user: req.session.user, categories, products });
@@ -316,7 +312,6 @@ const renderHome = async (req, res) => {
     res.render("user/home", { user: false, categories, products });
   }
 };
-
 
 //logout
 const logout = (req, res) => {
@@ -351,7 +346,6 @@ const forgotEmailVerify = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if the email is in database
     const user = await userSchema.findOne({ email });
     if (!user) {
       return res.redirect("/forgotmail?message=email not exist");
@@ -364,12 +358,11 @@ const forgotEmailVerify = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL, // Your email
-        pass: process.env.PASS, // Your email password
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
       },
     });
 
-    // Email options
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -377,20 +370,15 @@ const forgotEmailVerify = async (req, res) => {
       text: `Your OTP for signup is ${genotp}. It will expire in 10 minutes.`,
     };
 
-    // Send the OTP via email
     await transporter.sendMail(mailOptions);
 
-    // Store OTP and expiration time in session
     req.session.otp = genotp;
     req.session.signupdata = req.body;
-    req.session.otpExpires = Date.now() + 1 * 60 * 1000; // Set expiration time to 1 minute (60000 ms)
+    req.session.otpExpires = Date.now() + 1 * 60 * 1000;
+    console.log(req.session.otp);
 
-    console.log(req.session.otp); // Log the session OTP for debugging
-
-    // Redirect to the OTP input page
     res.redirect("/forgetOtp");
   } catch (error) {
-    console.error(error);
     res.send("Something went wrong");
   }
 };
@@ -415,11 +403,8 @@ const forgotPassOtp = (req, res) => {
       "/forgetOtp?message=OTP expired. Please request a new one."
     );
   }
-  console.log("njan forgot pass");
 
   if (parseInt(enteredOtp) === req.session.otp) {
-    console.log("OTP verified successfully");
-
     req.session.otp = null;
     req.session.otpExpires = null;
     res.render("user/newpass", { msg: null });
@@ -432,7 +417,6 @@ const forgotResendOTP = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Check if the email is in database
     const user = await userSchema.findOne({ email });
     if (!user) {
       return res.redirect("/forgotmail?message=emai not exist");
@@ -444,12 +428,11 @@ const forgotResendOTP = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.EMAIL, // Your email
-        pass: process.env.PASS, // Your email password
+        user: process.env.EMAIL,
+        pass: process.env.PASS,
       },
     });
 
-    // Email options
     const mailOptions = {
       from: process.env.EMAIL,
       to: email,
@@ -457,54 +440,41 @@ const forgotResendOTP = async (req, res) => {
       text: `Your OTP for signup is ${genotp}. It will expire in 10 minutes.`,
     };
 
-    // Send the OTP via email
     await transporter.sendMail(mailOptions);
 
     // Store OTP and expiration time in session
     req.session.otp = genotp;
     req.session.signupdata = req.body;
-    req.session.otpExpires = Date.now() + 1 * 60 * 1000; // Set expiration time to 1 minute (60000 ms)
+    req.session.otpExpires = Date.now() + 1 * 60 * 1000;
 
-    console.log(req.session.otp); // Log the session OTP for debugging
+    console.log(req.session.otp);
 
-    // Redirect to the OTP input page
     res.redirect("/forgetOtp");
   } catch (error) {
-    console.error(error);
     res.send("Something went wrong");
   }
 };
 
 const newpassVerify = async (req, res) => {
   try {
-    console.log("hai");
-
     const { password } = req.body;
     const email = req.session.email;
-    console.log(email, password);
 
-    // Find the user by email
     const existingUser = await userSchema.findOne({ email });
-    console.log(existingUser);
 
-    // Check if the user exists
     if (!existingUser) {
       return res.render("user/newpass", { message: "Email does not exist" });
     }
 
-    // Hash the new password
     const hashPassword = await bcrypt.hash(password, saltRound);
 
-    
     await userSchema.updateOne(
       { email: email },
-      { $set: { password: hashPassword } } 
+      { $set: { password: hashPassword } }
     );
 
-    console.log("Password updated successfully");
     res.render("user/login", { message: "Password changed successfully" });
   } catch (error) {
-    console.log(error);
     res.send("Something went wrong");
   }
 };
@@ -513,38 +483,30 @@ const newpassVerify = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   const { email, currentPassword, newPassword } = req.body;
-  console.log(email, currentPassword, newPassword);
-  
 
   try {
-      const user = await userSchema.findOne({ email });
-      if (!user) {
-          return res.status(404).json({ message: 'User not found' });
-      }
+    const user = await userSchema.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-      const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
 
-      if (!isMatch) {
-          return res.status(400).json({ message: 'Current password is incorrect' });
-      }
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
 
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      
-      await userSchema.updateOne(
-          { email: email }, 
-          { $set: { password: hashedPassword } } 
-        );
-      return res.status(200).json({ message: 'Password updated successfully' });
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
+    await userSchema.updateOne(
+      { email: email },
+      { $set: { password: hashedPassword } }
+    );
+    return res.status(200).json({ message: "Password updated successfully" });
   } catch (error) {
-      console.error('Error updating password:', error);
-      return res.status(500).json({ message: 'Server error' });
-}
+    return res.status(500).json({ message: "Server error" });
+  }
 };
-
-
-
-
 
 module.exports = {
   loadUserLogin,
@@ -564,5 +526,5 @@ module.exports = {
   forgotResendOTP,
   newpassVerify,
   demologin,
-  resetPassword
+  resetPassword,
 };

@@ -9,8 +9,7 @@ const ProductsSchema = require("../../model/productModel");
 const { log } = require("debug/src/node");
 const orderSchema = require("../../model/orderModel");
 const { logout } = require("../User/userController");
-const walletSchema=require("../../model/walletModel");
-
+const walletSchema = require("../../model/walletModel");
 
 // to render order management
 const order = async (req, res, next) => {
@@ -45,7 +44,6 @@ const order = async (req, res, next) => {
       totalPagesStock,
     });
   } catch (error) {
-    console.error(error);
     res.status(500).send("Server Error");
     // next()
   }
@@ -101,7 +99,6 @@ const changeItemStatus = (req, res) => {
 const approveProductCancellation = async (req, res) => {
   const { orderId, productId } = req.params;
 
-
   try {
     const order = await orderSchema.findById(orderId);
     if (!order) {
@@ -124,22 +121,19 @@ const approveProductCancellation = async (req, res) => {
     item.cancelled = true;
     item.Status = "Cancelled";
     item.cancellationRequested = false;
-    
-    
-    
-    //to find the product fund
-    const totalAmount=item.price*item.quantity
-    if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
-      item.Status = "Refund";
-      await refundToWallet(order.userID,totalAmount,orderId,productId);
-      
-  }
 
-     await ProductsSchema.findByIdAndUpdate(
+    //to find the product fund
+    const totalAmount = item.price * item.quantity;
+    if (order.paymentMethod === "UPI" && order.paymentStatus === "Success") {
+      item.Status = "Refund";
+      await refundToWallet(order.userID, totalAmount, orderId, productId);
+    }
+
+    await ProductsSchema.findByIdAndUpdate(
       productId,
       { $inc: { stock: item.quantity } },
       { new: true }
-      );
+    );
 
     await order.save();
 
@@ -147,137 +141,122 @@ const approveProductCancellation = async (req, res) => {
       .status(200)
       .json({ message: "Product cancellation approved successfully." });
   } catch (error) {
-    console.error("Error approving product cancellation:", error);
     res
       .status(500)
       .json({ message: "An error occurred while approving the cancellation." });
   }
 };
 
-
-
 // Approve Return Request
 const approveProductReturn = async (req, res) => {
-  console.log("here recived");
-  
   const { orderId, productId } = req.params;
 
   try {
-      
-      const order = await orderSchema.findById(orderId);
-      if (!order) {
-          return res.status(404).json({ message: "Order not found" });
-      }
+    const order = await orderSchema.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-      
-      const item = order.items.find(i => i.productID.toString() === productId);
-      if (!item) {
-          return res.status(404).json({ message: "Product not found in the order" });
-      }
+    const item = order.items.find((i) => i.productID.toString() === productId);
+    if (!item) {
+      return res
+        .status(404)
+        .json({ message: "Product not found in the order" });
+    }
 
-      
-      if (!item.returnRequested) {
-          return res.status(400).json({ message: "No return request for this product" });
-      }
+    if (!item.returnRequested) {
+      return res
+        .status(400)
+        .json({ message: "No return request for this product" });
+    }
 
-      
-      item.returned = true;
-      item.Status = "Returned";
-      item.returnRequested = false;
+    item.returned = true;
+    item.Status = "Returned";
+    item.returnRequested = false;
 
-      const totalAmount = item.price * item.quantity;
-      if (order.paymentMethod === 'UPI' && order.paymentStatus === 'Success') {
-          item.Status = "Refund";
-          await refundToWallet(order.userID, totalAmount, orderId, productId);
-      }
+    const totalAmount = item.price * item.quantity;
+    if (order.paymentMethod === "UPI" && order.paymentStatus === "Success") {
+      item.Status = "Refund";
+      await refundToWallet(order.userID, totalAmount, orderId, productId);
+    }
 
-      
-      await ProductsSchema.findByIdAndUpdate(
-          productId,
-          { $inc: { stock: item.quantity } },
-          { new: true }
-      );
+    await ProductsSchema.findByIdAndUpdate(
+      productId,
+      { $inc: { stock: item.quantity } },
+      { new: true }
+    );
 
-      
-      await order.save();
+    await order.save();
 
-      res.status(200).json({ message: "Product return approved successfully." });
+    res.status(200).json({ message: "Product return approved successfully." });
   } catch (error) {
-      console.error("Error approving product return:", error);
-      res.status(500).json({ message: "An error occurred while approving the return." });
+    res
+      .status(500)
+      .json({ message: "An error occurred while approving the return." });
   }
 };
 
- 
 //refund to wallet
-const refundToWallet = async (userId, amount,orderId,productId) => {
+const refundToWallet = async (userId, amount, orderId, productId) => {
   try {
-
-
-
-      const wallet = await walletSchema.findOneAndUpdate(
-          { userId },
-          { 
-              $inc: { balance: amount },
-              $push: { 
-                  transactions: { 
-                      type: 'credit', 
-                      amount: amount, 
-                      description: 'Refund for cancelled order' 
-                  } 
-              } 
+    const wallet = await walletSchema.findOneAndUpdate(
+      { userId },
+      {
+        $inc: { balance: amount },
+        $push: {
+          transactions: {
+            type: "credit",
+            amount: amount,
+            description: "Refund for cancelled order",
           },
-          { new: true, upsert: true } 
-      );
-       
-       
-       await orderSchema.findOneAndUpdate(
-        { _id: orderId, 'items.productID': productId },  // Match orderId and specific productID
-        { $set: { 'items.$.Status': 'Refund' } },  // Update the Status of the matched item
-        { new: true }  // Return the updated document
-      );
-      
-      
-      console.log("hkshdkjhdsfkjhkjfshdkj");
+        },
+      },
+      { new: true, upsert: true }
+    );
 
+    await orderSchema.findOneAndUpdate(
+      { _id: orderId, "items.productID": productId }, // Match orderId and specific productID
+      { $set: { "items.$.Status": "Refund" } }, // Update the Status of the matched item
+      { new: true } // Return the updated document
+    );
   } catch (error) {
-      console.error('Error processing refund to wallet:', error);
-      throw new Error('Refund to wallet failed');
+    throw new Error("Refund to wallet failed");
   }
 };
-
-
 
 //order details
-const orderDetails=async (req, res) => {
+const orderDetails = async (req, res) => {
   const { orderId } = req.params;
 
   try {
-      const order = await orderSchema.findById(orderId).populate('items.productID'); 
+    const order = await orderSchema
+      .findById(orderId)
+      .populate("items.productID");
 
-      if (!order) {
-          return res.status(404).json({ message: 'Order not found' });
-      }
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
 
-      res.json({
-          orderid:order._id,
-          orderedDate: order.createdAt, 
-          orderStatus: order.orderStatus,
-          shippingAddress: order.shippingAddress,
-          items: order.items,
-          totalAmount: order.totalAmount,
-      });
+    res.json({
+      orderid: order._id,
+      orderedDate: order.createdAt,
+      orderStatus: order.orderStatus,
+      shippingAddress: order.shippingAddress,
+      items: order.items,
+      totalAmount: order.totalAmount,
+    });
   } catch (error) {
-      console.error('Error fetching order details:', error);
-      res.status(500).json({ message: 'An error occurred while fetching the order details' });
-}
-}
+    console.error("Error fetching order details:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching the order details" });
+  }
+};
 
 module.exports = {
   order,
   approveProductCancellation,
   changeItemStatus,
   orderDetails,
-  approveProductReturn
-
+  approveProductReturn,
 };

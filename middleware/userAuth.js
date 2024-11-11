@@ -5,10 +5,8 @@ const userSchema= require("../model/userModel")
 //User session check login
 const checkUserSession=async (req,res,next)=>{
     const userId= req.session.user._id
-    console.log("sdfklhakjfhdkjg",userId);
     
     const isBlocked= await userSchema.findById(userId)
-    console.log(isBlocked.isBlocked);
     
     if(req.session.user && !isBlocked.isBlocked ){
         next()

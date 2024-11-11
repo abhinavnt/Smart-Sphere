@@ -117,7 +117,6 @@ app.use(handle404Error);
 
 
 app.listen(process.env.PORT, () => {
-    console.log(process.env.PORT);
     console.log("http://localhost:3000");
     
 }

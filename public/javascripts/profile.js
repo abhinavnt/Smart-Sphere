@@ -5,7 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
   viewOrderButtons.forEach((button) => {
     button.addEventListener("click", function () {
       const orderId = this.getAttribute("data-id");
-      console.log("Order ID:", orderId);
 
       // Fetch order details using Axios
       axios
@@ -13,7 +12,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((response) => {
           const order = response.data;
 
-          // Populate the modal with order details
           document.getElementById("orderedDate").innerText = new Date(
             order.orderedDate
           ).toLocaleDateString();
@@ -25,22 +23,24 @@ document.addEventListener("DOMContentLoaded", function () {
             "shippingAddress"
           ).innerText = `${order.shippingAddress.fullname}, ${order.shippingAddress.address}, ${order.shippingAddress.pincode}`;
           document.getElementById("orderID").innerText = order.orderid;
-          document.getElementById("coupondiscount").innerText = order.couponDiscount?order.couponDiscount:0
-          document.getElementById("offerDiscount").innerText = order.offerDiscount?order.offerDiscount:0
+          document.getElementById("coupondiscount").innerText =
+            order.couponDiscount ? order.couponDiscount : 0;
+          document.getElementById("offerDiscount").innerText =
+            order.offerDiscount ? order.offerDiscount : 0;
 
-          // Check if any item has a Status of "Delivered" to display the "Download Invoice" button
-          const downloadInvoiceButton = document.getElementById("downloadInvoiceButton");
-          const hasDeliveredItem = order.items.some(item => item.Status === "Delivered");
+          const downloadInvoiceButton = document.getElementById(
+            "downloadInvoiceButton"
+          );
+          const hasDeliveredItem = order.items.some(
+            (item) => item.Status === "Delivered"
+          );
 
           if (hasDeliveredItem) {
             downloadInvoiceButton.style.display = "inline-block";
-           
           } else {
             downloadInvoiceButton.style.display = "none";
-         
           }
 
-          // Create a container to hold product details with enhanced styling
           let productsHtml = "";
 
           order.items.forEach((item) => {
@@ -60,25 +60,23 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
           });
 
-          // Set all products HTML once at the end
           document.getElementById("orderedProducts").innerHTML = productsHtml;
 
-          document.getElementById("totalAmount").innerText = `${order.totalAmount}`;
+          document.getElementById(
+            "totalAmount"
+          ).innerText = `${order.totalAmount}`;
 
-          // Show the modal
           const modal = new bootstrap.Modal(
             document.getElementById("orderDetailModal")
           );
           modal.show();
         })
         .catch((error) => {
-          console.error("Error fetching order details:", error);
           alert("An error occurred while fetching order details.");
         });
     });
   });
 });
-
 
 function downloadInvoice() {
   const { jsPDF } = window.jspdf;
@@ -100,15 +98,15 @@ function downloadInvoice() {
   const orderStatus = document.getElementById("orderStatus").innerText;
   const shippingAddress = document.getElementById("shippingAddress").innerText;
   const totalAmount = document.getElementById("totalAmount").innerText;
-  const offerDiscount=document.getElementById("offerDiscount").innerText
-  const couponDiscount=document.getElementById("coupondiscount").innerText
+  const offerDiscount = document.getElementById("offerDiscount").innerText;
+  const couponDiscount = document.getElementById("coupondiscount").innerText;
 
   // Add order info with background and spacing
-  pdf.setFontSize(12); 
+  pdf.setFontSize(12);
   pdf.setTextColor(40);
   pdf.setFont("helvetica", "normal");
   pdf.setFillColor(440, 440, 440);
-  pdf.rect(10, 30, 190, 25, 'F'); 
+  pdf.rect(10, 30, 190, 25, "F");
 
   pdf.text(`Order ID: ${orderId}`, 12, 40);
   pdf.text(`Ordered Date: ${orderedDate}`, 12, 45);
@@ -119,30 +117,34 @@ function downloadInvoice() {
   pdf.setFontSize(14);
   pdf.setTextColor(255);
   pdf.setFillColor(50, 50, 150); // Darker background for table header
-  pdf.rect(10, 70, 190, 10, 'F');
+  pdf.rect(10, 70, 190, 10, "F");
   pdf.text("Product Name", 12, 77);
   pdf.text("Price", 80, 77);
   pdf.text("Quantity", 120, 77);
   pdf.text("Total", 160, 77);
 
   // Get product details and add each product with lines
-  const orderItems = [...document.querySelectorAll("#orderedProducts .card-body")];
+  const orderItems = [
+    ...document.querySelectorAll("#orderedProducts .card-body"),
+  ];
   let yPosition = 87;
   pdf.setFontSize(12);
   pdf.setTextColor(0);
 
   orderItems.forEach((item, index) => {
-    
-    
     const productName = item.querySelector(".card-title").innerText;
-    const productPrice = item.querySelectorAll(".card-text")[0].innerText.replace('Price: ₹', '');
-    const quantity = item.querySelectorAll(".card-text")[1].innerText.replace('Quantity: ', '');
+    const productPrice = item
+      .querySelectorAll(".card-text")[0]
+      .innerText.replace("Price: ₹", "");
+    const quantity = item
+      .querySelectorAll(".card-text")[1]
+      .innerText.replace("Quantity: ", "");
     const total = (parseFloat(productPrice) * parseInt(quantity)).toFixed(2);
 
     // Alternate row color for readability
     if (index % 2 === 0) pdf.setFillColor(245, 245, 245);
     else pdf.setFillColor(255, 255, 255);
-    pdf.rect(10, yPosition - 5, 190, 10, 'F');
+    pdf.rect(10, yPosition - 5, 190, 10, "F");
 
     pdf.text(productName, 12, yPosition);
     pdf.text(`${productPrice}`, 80, yPosition);
@@ -151,15 +153,13 @@ function downloadInvoice() {
 
     yPosition += 10;
   });
-  
+
   pdf.setFontSize(10);
   pdf.setFont("helvetica", "bold");
   pdf.text(`coupon Discount: ${couponDiscount}`, 10, yPosition + 10);
   pdf.text(`offer Discount: ${offerDiscount}`, 10, yPosition + 15);
   pdf.text(`Delivery charge: 50`, 10, yPosition + 20);
-  
- 
-   
+
   // Add total amount with emphasis
   pdf.setFontSize(14);
   pdf.setFont("helvetica", "bold");
@@ -169,13 +169,13 @@ function downloadInvoice() {
   pdf.setFontSize(10);
   pdf.setTextColor(100);
   pdf.text("Thank you for your purchase!", 105, 285, { align: "center" });
-  pdf.text("Contact us for any questions regarding your order.", 105, 290, { align: "center" });
+  pdf.text("Contact us for any questions regarding your order.", 105, 290, {
+    align: "center",
+  });
 
   // Save the PDF
   pdf.save(`Invoice_${orderId}.pdf`);
 }
-
-
 
 // Function to cancel a specific product
 document.addEventListener("DOMContentLoaded", function () {
@@ -186,48 +186,50 @@ document.addEventListener("DOMContentLoaded", function () {
       const orderId = this.getAttribute("data-orderid");
       const productId = this.getAttribute("data-productid");
 
-      
       Swal.fire({
-        title: 'Cancel Product',
-        text: 'Please select a reason for cancellation:',
-        input: 'select',
+        title: "Cancel Product",
+        text: "Please select a reason for cancellation:",
+        input: "select",
         inputOptions: {
-          'Not needed anymore': 'Not needed anymore',
-          'Found a better price': 'Found a better price',
-          'Ordered by mistake': 'Ordered by mistake',
-          'Product not available': 'Product not available',
-          'Other': 'Other'
+          "Not needed anymore": "Not needed anymore",
+          "Found a better price": "Found a better price",
+          "Ordered by mistake": "Ordered by mistake",
+          "Product not available": "Product not available",
+          Other: "Other",
         },
-        inputPlaceholder: 'Select a reason',
+        inputPlaceholder: "Select a reason",
         showCancelButton: true,
-        confirmButtonText: 'Submit',
-        cancelButtonText: 'Cancel',
+        confirmButtonText: "Submit",
+        cancelButtonText: "Cancel",
         inputValidator: (value) => {
           if (!value) {
-            return 'You need to select a reason for cancellation!';
+            return "You need to select a reason for cancellation!";
           }
-        }
+        },
       }).then((result) => {
         if (result.isConfirmed) {
           const reason = result.value;
           axios
             .post(`/order/cancel/${orderId}/${productId}`, { reason })
             .then((response) => {
-              Swal.fire("Cancelled!", response.data.message, "success").then(() => {
-                location.reload();
-              });
+              Swal.fire("Cancelled!", response.data.message, "success").then(
+                () => {
+                  location.reload();
+                }
+              );
             })
             .catch((error) => {
-              Swal.fire("Error!", error.response?.data?.message || "Something went wrong!", "error");
+              Swal.fire(
+                "Error!",
+                error.response?.data?.message || "Something went wrong!",
+                "error"
+              );
             });
         }
       });
     });
   });
 });
-
-
-
 
 //retuern product
 document.addEventListener("DOMContentLoaded", function () {
@@ -236,36 +238,42 @@ document.addEventListener("DOMContentLoaded", function () {
   // Function to handle return product
   function handleReturnProduct(orderId, productId) {
     Swal.fire({
-      title: 'Return Product',
-      text: 'Please select a reason for return:',
-      input: 'select',
+      title: "Return Product",
+      text: "Please select a reason for return:",
+      input: "select",
       inputOptions: {
-        'Damaged product': 'Damaged product',
-        'Wrong product delivered': 'Wrong product delivered',
-        'Product quality issue': 'Product quality issue',
-        'Other': 'Other'
+        "Damaged product": "Damaged product",
+        "Wrong product delivered": "Wrong product delivered",
+        "Product quality issue": "Product quality issue",
+        Other: "Other",
       },
-      inputPlaceholder: 'Select a reason',
+      inputPlaceholder: "Select a reason",
       showCancelButton: true,
-      confirmButtonText: 'Submit',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: "Submit",
+      cancelButtonText: "Cancel",
       inputValidator: (value) => {
         if (!value) {
-          return 'You need to select a reason for return!';
+          return "You need to select a reason for return!";
         }
-      }
+      },
     }).then((result) => {
       if (result.isConfirmed) {
         const reason = result.value;
         axios
           .post(`/order/return/${orderId}/${productId}`, { reason })
           .then((response) => {
-            Swal.fire("Returned!", response.data.message, "success").then(() => {
-              location.reload();
-            });
+            Swal.fire("Returned!", response.data.message, "success").then(
+              () => {
+                location.reload();
+              }
+            );
           })
           .catch((error) => {
-            Swal.fire("Error!", error.response?.data?.message || "Something went wrong!", "error");
+            Swal.fire(
+              "Error!",
+              error.response?.data?.message || "Something went wrong!",
+              "error"
+            );
           });
       }
     });
@@ -281,10 +289,6 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-
-
-
-
 //adress modal
 document.addEventListener("DOMContentLoaded", function () {
   const addressModal = new bootstrap.Modal(
@@ -297,8 +301,6 @@ document.addEventListener("DOMContentLoaded", function () {
   );
   const submitAddressBtn = document.getElementById("submitAddress");
 
-
-
   // Handle delete address
   addressList.addEventListener("click", function (e) {
     if (e.target.classList.contains("deleteAddress")) {
@@ -310,18 +312,12 @@ document.addEventListener("DOMContentLoaded", function () {
         axios
           .delete(`/daleteAddress/${addressId}`)
           .then((response) => {
-            console.log(response.data.message);
-
             e.target.closest("li").remove();
           })
-          .catch((error) => {
-            console.error("Error deleting address:", error);
-          });
+          .catch((error) => {});
       }
     }
   });
-
-
 
   // Open modal for adding a new address
   openModalBtn.addEventListener("click", function () {
@@ -333,17 +329,12 @@ document.addEventListener("DOMContentLoaded", function () {
     addressModal.show();
   });
 
-
-
-
   // Close modal
   closeModalBtns.forEach((btn) => {
     btn.addEventListener("click", function () {
       addressModal.hide(); // Use Bootstrap method to hide the modal
     });
   });
-
-
 
   // Handle Add/Edit Address
   submitAddressBtn.addEventListener("click", function () {
@@ -354,9 +345,6 @@ document.addEventListener("DOMContentLoaded", function () {
       addAddress();
     }
   });
-
-
-
 
   // Open modal to edit an address
   document
@@ -385,19 +373,14 @@ document.addEventListener("DOMContentLoaded", function () {
   function addAddress() {
     const addressData = getAddressData();
     if (validateForm(addressData)) {
-      console.log(userId);
-
       axios
         .post(`/addAddress/${userId}`, addressData)
         .then((response) => {
-          console.log("Address added:", response.data);
           addressModal.hide();
           addressForm.reset();
           location.reload();
         })
-        .catch((error) => {
-          console.error("Error adding address:", error);
-        });
+        .catch((error) => {});
     }
   }
 
@@ -412,16 +395,12 @@ document.addEventListener("DOMContentLoaded", function () {
           addressData
         );
         if (response.status === 200) {
-          console.log("Address updated successfully");
           addressModal.hide();
           addressForm.reset();
           location.reload();
         } else {
-          console.error("Failed to update address", response);
         }
-      } catch (error) {
-        console.error("Error updating address:", error);
-      }
+      } catch (error) {}
     }
   }
 
@@ -452,18 +431,18 @@ document.addEventListener("DOMContentLoaded", function () {
       isValid = false;
     }
     if (!data.phone) {
-        displayError("phoneError", "Phone cannot be empty or whitespace.");
-        isValid = false;
-      } else if (!/^\d{10}$/.test(data.phone)) {
-        displayError("phoneError", "Phone number must be exactly 10 digits.");
-        isValid = false;
-      } else if (/^0{10}$/.test(data.phone)) {
-        displayError("phoneError", "Phone number cannot be all zeros.");
-        isValid = false;
-      } else {
-        displayError("phoneError", "");
-      }
-      
+      displayError("phoneError", "Phone cannot be empty or whitespace.");
+      isValid = false;
+    } else if (!/^\d{10}$/.test(data.phone)) {
+      displayError("phoneError", "Phone number must be exactly 10 digits.");
+      isValid = false;
+    } else if (/^0{10}$/.test(data.phone)) {
+      displayError("phoneError", "Phone number cannot be all zeros.");
+      isValid = false;
+    } else {
+      displayError("phoneError", "");
+    }
+
     if (!data.district) {
       displayError("districtError", "District cannot be empty or whitespace.");
       isValid = false;
@@ -477,19 +456,18 @@ document.addEventListener("DOMContentLoaded", function () {
       isValid = false;
     }
     if (!data.pincode) {
-        displayError("pincodeError", "Pincode cannot be empty or whitespace.");
-        isValid = false;
-      } else if (!/^\d{6}$/.test(data.pincode)) {
-        displayError("pincodeError", "Pincode must be exactly 6 digits.");
-        isValid = false;
-      } else if (/^0{6}$/.test(data.pincode)) {
-        displayError("pincodeError", "invalid Pincode ");
-        isValid = false;
-      } else {
-        
-        displayError("pincodeError", "");
-      }
-      
+      displayError("pincodeError", "Pincode cannot be empty or whitespace.");
+      isValid = false;
+    } else if (!/^\d{6}$/.test(data.pincode)) {
+      displayError("pincodeError", "Pincode must be exactly 6 digits.");
+      isValid = false;
+    } else if (/^0{6}$/.test(data.pincode)) {
+      displayError("pincodeError", "invalid Pincode ");
+      isValid = false;
+    } else {
+      displayError("pincodeError", "");
+    }
+
     if (!data.country) {
       displayError("countryError", "Country cannot be empty or whitespace.");
       isValid = false;
@@ -523,9 +501,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-
-
-
 //update user details
 document.getElementById("profileForm").addEventListener("submit", function (e) {
   e.preventDefault();
@@ -545,212 +520,234 @@ document.getElementById("profileForm").addEventListener("submit", function (e) {
       alert("Profile updated successfully!");
     })
     .catch((error) => {
-      console.error(error);
       alert("There was an error updating the profile.");
     });
 });
 
-
-
-
-
 // to reset password
-document.getElementById('resetPasswordBtn').addEventListener('click', function() {
-  const modal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
-  modal.show();
-  resetValidationMessages();
-});
+document
+  .getElementById("resetPasswordBtn")
+  .addEventListener("click", function () {
+    const modal = new bootstrap.Modal(
+      document.getElementById("resetPasswordModal")
+    );
+    modal.show();
+    resetValidationMessages();
+  });
 
-document.getElementById('submitResetPassword').addEventListener('click', function() {
-  validateAndSubmit();
-});
+document
+  .getElementById("submitResetPassword")
+  .addEventListener("click", function () {
+    validateAndSubmit();
+  });
 
-document.getElementById('currentEmail').addEventListener('input', validateEmail);
-document.getElementById('currentPassword').addEventListener('input', validateCurrentPassword);
-document.getElementById('newPassword').addEventListener('input', validateNewPassword);
+document
+  .getElementById("currentEmail")
+  .addEventListener("input", validateEmail);
+document
+  .getElementById("currentPassword")
+  .addEventListener("input", validateCurrentPassword);
+document
+  .getElementById("newPassword")
+  .addEventListener("input", validateNewPassword);
 
-document.getElementById('toggleCurrentPassword').addEventListener('click', function() {
-  togglePasswordVisibility('currentPassword', 'currentPasswordIcon');
-});
+document
+  .getElementById("toggleCurrentPassword")
+  .addEventListener("click", function () {
+    togglePasswordVisibility("currentPassword", "currentPasswordIcon");
+  });
 
-document.getElementById('toggleNewPassword').addEventListener('click', function() {
-  togglePasswordVisibility('newPassword', 'newPasswordIcon');
-});
+document
+  .getElementById("toggleNewPassword")
+  .addEventListener("click", function () {
+    togglePasswordVisibility("newPassword", "newPasswordIcon");
+  });
 
 function validateAndSubmit() {
   resetValidationMessages();
 
-  const currentEmail = document.getElementById('currentEmail').value;
-  const currentPassword = document.getElementById('currentPassword').value;
-  const newPassword = document.getElementById('newPassword').value;
+  const currentEmail = document.getElementById("currentEmail").value;
+  const currentPassword = document.getElementById("currentPassword").value;
+  const newPassword = document.getElementById("newPassword").value;
 
   let valid = true;
 
   if (!currentEmail) {
-      showError('currentEmail', 'This field is required');
-      valid = false;
+    showError("currentEmail", "This field is required");
+    valid = false;
   }
 
   if (!currentPassword) {
-      showError('currentPassword', 'This field is required');
-      valid = false;
+    showError("currentPassword", "This field is required");
+    valid = false;
   }
 
   if (!newPassword) {
-      showError('newPassword', 'This field is required');
-      valid = false;
+    showError("newPassword", "This field is required");
+    valid = false;
   } else {
-     
-      if (!passwordPattern.test(newPassword)) {
-          showError('newPassword', ' ');
-          valid = false;
-      }
+    if (!passwordPattern.test(newPassword)) {
+      showError("newPassword", " ");
+      valid = false;
+    }
   }
 
   if (!valid) {
-      return;
+    return;
   }
 
   const data = {
-      email: currentEmail,
-      currentPassword: currentPassword,
-      newPassword: newPassword
+    email: currentEmail,
+    currentPassword: currentPassword,
+    newPassword: newPassword,
   };
 
-  axios.patch(`/resetPassword/${userId}`, data)
-  .then(response => {
+  axios
+    .patch(`/resetPassword/${userId}`, data)
+    .then((response) => {
       Swal.fire({
-          title: 'Success!',
-          text: 'Password updated successfully!',
-          icon: 'success',
-          confirmButtonText: 'OK'
+        title: "Success!",
+        text: "Password updated successfully!",
+        icon: "success",
+        confirmButtonText: "OK",
       }).then(() => {
-          location.reload();
+        location.reload();
       });
-  })
-  .catch(error => {
+    })
+    .catch((error) => {
       if (error.response) {
-          
-          Swal.fire({
-              title: 'Error!',
-              text: error.response.data.message || 'Failed to update password. Please try again.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-          });
+        Swal.fire({
+          title: "Error!",
+          text:
+            error.response.data.message ||
+            "Failed to update password. Please try again.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       } else {
-         
-          Swal.fire({
-              title: 'Error!',
-              text: 'An error occurred. Please try again later.',
-              icon: 'error',
-              confirmButtonText: 'OK'
-          });
+        Swal.fire({
+          title: "Error!",
+          text: "An error occurred. Please try again later.",
+          icon: "error",
+          confirmButtonText: "OK",
+        });
       }
-  });
+    });
 }
 
-
 function validateEmail() {
-  const emailField = document.getElementById('currentEmail');
+  const emailField = document.getElementById("currentEmail");
   if (!emailField.value) {
-      showError('currentEmail', 'This field is required');
+    showError("currentEmail", "This field is required");
   } else {
-      clearError('currentEmail'); 
+    clearError("currentEmail");
   }
 }
 
 function validateCurrentPassword() {
-  const passwordField = document.getElementById('currentPassword');
+  const passwordField = document.getElementById("currentPassword");
   if (!passwordField.value) {
-      showError('currentPassword', 'This field is required');
+    showError("currentPassword", "This field is required");
   } else {
-      clearError('currentPassword');
+    clearError("currentPassword");
   }
 }
 
 function validateNewPassword() {
-  const passwordField = document.getElementById('newPassword');
-  const passwordPattern = /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
+  const passwordField = document.getElementById("newPassword");
+  const passwordPattern =
+    /^(?=.[a-z])(?=.[A-Z])(?=.\d)(?=.[@$!%?&])[A-Za-z\d@$!%?&]{8,}$/;
 
   if (!passwordField.value) {
-      showError('newPassword', 'This field is required');
+    showError("newPassword", "This field is required");
   } else if (!passwordPattern.test(passwordField.value)) {
-      showError('newPassword', 'Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters. hai hoi');
+    showError(
+      "newPassword",
+      "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters. hai hoi"
+    );
   } else {
-      clearError('newPassword');
+    clearError("newPassword");
   }
 }
 
 function togglePasswordVisibility(fieldId, iconId) {
   const passwordField = document.getElementById(fieldId);
   const icon = document.getElementById(iconId);
-  const isPasswordVisible = passwordField.type === 'text';
-  
-  passwordField.type = isPasswordVisible ? 'password' : 'text';
-  icon.classList.toggle('bi-eye', !isPasswordVisible);
-  icon.classList.toggle('bi-eye-slash', isPasswordVisible);
+  const isPasswordVisible = passwordField.type === "text";
+
+  passwordField.type = isPasswordVisible ? "password" : "text";
+  icon.classList.toggle("bi-eye", !isPasswordVisible);
+  icon.classList.toggle("bi-eye-slash", isPasswordVisible);
 }
 
 function showError(fieldId, message) {
   const field = document.getElementById(fieldId);
-  const existingError = field.parentNode.querySelector('.form-text.text-danger');
-  
+  const existingError = field.parentNode.querySelector(
+    ".form-text.text-danger"
+  );
+
   if (!existingError) {
-      const errorMessage = document.createElement('small');
-      errorMessage.className = 'form-text text-danger';
-      errorMessage.innerText = message;
-      field.parentNode.appendChild(errorMessage);
+    const errorMessage = document.createElement("small");
+    errorMessage.className = "form-text text-danger";
+    errorMessage.innerText = message;
+    field.parentNode.appendChild(errorMessage);
   }
 }
 
 function clearError(fieldId) {
   const field = document.getElementById(fieldId);
-  const existingError = field.parentNode.querySelector('.form-text.text-danger');
-  
+  const existingError = field.parentNode.querySelector(
+    ".form-text.text-danger"
+  );
+
   if (existingError) {
-      existingError.remove();
+    existingError.remove();
   }
 }
 
 function resetValidationMessages() {
-  const errorMessages = document.querySelectorAll('.form-text.text-danger');
-  errorMessages.forEach(msg => msg.remove());
+  const errorMessages = document.querySelectorAll(".form-text.text-danger");
+  errorMessages.forEach((msg) => msg.remove());
 }
 
-
-
 //show all Transaction Modal
-document.addEventListener('DOMContentLoaded', () => {
-  const viewTransactionsButton = document.getElementById('viewTransactionsButton');
-  const transactionsModal = document.getElementById('transactionsModal');
+document.addEventListener("DOMContentLoaded", () => {
+  const viewTransactionsButton = document.getElementById(
+    "viewTransactionsButton"
+  );
+  const transactionsModal = document.getElementById("transactionsModal");
 
-  viewTransactionsButton.addEventListener('click', async () => {
-      try {
-          const response = await axios.get('/wallet/transactions');
-          const transactions = response.data;
+  viewTransactionsButton.addEventListener("click", async () => {
+    try {
+      const response = await axios.get("/wallet/transactions");
+      const transactions = response.data;
 
-          const transactionsContainer = document.getElementById('transactionsContainer');
-          transactionsContainer.innerHTML = '';
+      const transactionsContainer = document.getElementById(
+        "transactionsContainer"
+      );
+      transactionsContainer.innerHTML = "";
 
-          transactions.forEach(transaction => {
-              const transactionItem = document.createElement('div');
-              transactionItem.className = 'list-group-item';
-              transactionItem.innerHTML = `
+      transactions.forEach((transaction) => {
+        const transactionItem = document.createElement("div");
+        transactionItem.className = "list-group-item";
+        transactionItem.innerHTML = `
                   <div class="d-flex justify-content-between">
                       <strong>${transaction.type}</strong>
-                      <small>${new Date(transaction.date).toLocaleDateString('en-IN')}</small>
+                      <small>${new Date(transaction.date).toLocaleDateString(
+                        "en-IN"
+                      )}</small>
                   </div>
-                  <p class="mb-1">Amount: <span class="text-success">${transaction.amount}</span></p>
+                  <p class="mb-1">Amount: <span class="text-success">${
+                    transaction.amount
+                  }</span></p>
                   <small>${transaction.description}</small>
               `;
-              transactionsContainer.appendChild(transactionItem);
-          });
+        transactionsContainer.appendChild(transactionItem);
+      });
 
-          // Show the modal after loading transactions
-          const modal = new bootstrap.Modal(transactionsModal);
-          modal.show();
-      } catch (error) {
-          console.error('Error fetching transactions:', error);
-      }
+      // Show the modal after loading transactions
+      const modal = new bootstrap.Modal(transactionsModal);
+      modal.show();
+    } catch (error) {}
   });
 });
