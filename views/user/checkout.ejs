@@ -619,7 +619,7 @@ if (validateForm()) {
                 title: 'Payment Failed',
                 text: 'Your payment failed. Please try again.',
             });
-            console.log(orderId,"hey houi sdahfkh")
+        
             // Update backend on payment failure
             axios.post(`/payment/failure/${orderId}`, {
                 
