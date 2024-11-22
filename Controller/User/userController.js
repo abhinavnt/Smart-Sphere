@@ -14,7 +14,7 @@ require("dotenv").config();
 //-----------------------------------------------------------------Authentication---------------------------------------------------------------
 
 //user login page load
-const loadUserLogin = (req, res) => {
+const  loadUserLogin = (req, res) => {
   const message = req.query.message;
 
   res.render("user/login", { msg: message });
@@ -90,10 +90,9 @@ const userSignupVerify = async (req, res) => {
       return res.redirect("/signup?message=email already exist");
     }
 
-    // Generate a random 4-digit OTP
+    
     const genotp = Math.floor(1000 + Math.random() * 9000);
-    console.log(genotp); // Log the OTP for debugging
-
+    console.log(genotp); 
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {

@@ -86,7 +86,6 @@
             passwordEye.classList.toggle('fa-eye-slash');
         });
 
-        // Toggle password visibility for Confirm Password field
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
         const confirmPasswordInput = document.getElementById('confirmPassword');
         const confirmPasswordEye = document.getElementById('confirmPasswordEye');
@@ -97,10 +96,9 @@
             confirmPasswordEye.classList.toggle('fa-eye-slash');
         });
 
-        // Allow only numeric input for phone field
         const phoneInput = document.getElementById('phone');
         phoneInput.addEventListener('input', function (e) {
-            this.value = this.value.replace(/[^0-9]/g, ''); // Remove any non-numeric characters
+            this.value = this.value.replace(/[^0-9]/g, ''); 
         });
     </script>
 </body>

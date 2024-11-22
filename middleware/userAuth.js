@@ -4,7 +4,7 @@ const userSchema= require("../model/userModel")
 
 //User session check login
 const checkUserSession=async (req,res,next)=>{
-    const userId= req.session.user._id
+    const userId= req.session.user ? req.session.user._id : null
     
     const isBlocked= await userSchema.findById(userId)
     

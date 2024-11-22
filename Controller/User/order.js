@@ -39,6 +39,14 @@ const cancelProductInOrder = async (req, res) => {
         .json({ message: "Cancellation already requested for this product." });
     }
 
+  let total= order.totalAmount - item.price
+
+  if(total<order.couponMinLimit){
+    return res.status(400).json({message:"you can't cancel this product minimum cart value of the coupon is less than totalamount"})
+  }
+  
+
+
     item.cancellationRequested = true;
     item.cancellationReason = reason;
 

@@ -86,6 +86,7 @@ const orderSchema = new mongoose.Schema(
     couponDiscount: { type: Number },
     offerDiscount: { type: Number, default: 0 },
     couponDiscount: { type: Number, default: 0 },
+    couponMinLimit:{type:Number,default:0},
     orderDate: {
       type: Date,
       default: Date.now,

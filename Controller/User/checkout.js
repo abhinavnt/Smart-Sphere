@@ -155,6 +155,7 @@ const placeOrder = async (req, res) => {
         });
       }
     }
+    req.session.couponDiscound = null 
 
     if (outOfStockProducts.length > 0) {
       return res
@@ -195,7 +196,10 @@ const placeOrder = async (req, res) => {
 
     if (req.session.couponDiscound) {
       newOrder.couponDiscount = req.session.couponDiscound;
-      newOrder.offerDiscount = req.session.couponDiscound;
+    }
+
+    if(req.session.minCartValue){
+      newOrder.couponMinLimit=req.session.minCartValue
     }
 
     if (paymentMethod === "bankTransfer") {
@@ -426,7 +430,8 @@ const applyCoupon = async (req, res) => {
       { new: true }
     );
 
-    req.session.couponDiscound = coupon.discountAmount;
+    req.session.couponDiscound = discount
+    req.session.minCartValue= coupon.minAmount
 
     coupon.usedBy.push(userId);
     await coupon.save();
