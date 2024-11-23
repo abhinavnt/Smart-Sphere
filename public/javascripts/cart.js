@@ -134,7 +134,7 @@ document.querySelectorAll(".remove-item").forEach((button) => {
                 if (!response.data.success) {
                     console.error('Failed to update item quantity in cart');
                 }else{
-                    location.reload()
+                   
                 }
             })
             .catch(error => {

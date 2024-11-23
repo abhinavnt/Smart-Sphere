@@ -232,6 +232,10 @@ const updateCart = async (req, res) => {
     if (itemIndex !== -1) {
       cart.items[itemIndex].quantity = quantity;
 
+      cart.totalPrice = cart.items.reduce((total, item) => {
+        return total + (item.price * item.quantity);
+    }, 0);
+
       await cart.save();
 
       return res.json({ success: true, message: "Item quantity updated" });
