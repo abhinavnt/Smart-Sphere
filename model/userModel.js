@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     profilepic: String,
     googleId: String,
     isBlocked: { type: Boolean, default: false },
+    refferalCode:{type:String,required:true,unique:true}
   },
   { timestamps: true }
 );

@@ -8,13 +8,14 @@ const addressSchema = require("../../model/adressModel");
 const orderSchema = require("../../model/orderModel");
 const offerSchema = require("../../model/offerModel");
 const walletSchema = require("../../model/walletModel");
+const { v4: uuidv4 } = require("uuid");
 const saltRound = 10;
 require("dotenv").config();
 
 //-----------------------------------------------------------------Authentication---------------------------------------------------------------
 
 //user login page load
-const  loadUserLogin = (req, res) => {
+const loadUserLogin = (req, res) => {
   const message = req.query.message;
 
   res.render("user/login", { msg: message });
@@ -90,9 +91,9 @@ const userSignupVerify = async (req, res) => {
       return res.redirect("/signup?message=email already exist");
     }
 
-    
     const genotp = Math.floor(1000 + Math.random() * 9000);
-    console.log(genotp); 
+    console.log(genotp);
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -119,7 +120,9 @@ const userSignupVerify = async (req, res) => {
 
     res.redirect("/otp");
   } catch (error) {
-    res.send("Something went wrong");
+    console.log(error);
+
+    res.status(500).send("Something went wrongggggg");
   }
 };
 
@@ -188,26 +191,43 @@ const verifyOTP = async (req, res) => {
     return res.redirect("/otp?message=OTP expired. Please request a new one.");
   }
 
+  const refferalCode = uuidv4();
+
   if (parseInt(enteredOtp) === req.session.otp) {
-    const newUser = new userSchema({ username, email, password });
+    const newUser = new userSchema({ username, email, password, refferalCode });
 
     if (req.session.refralcode) {
-      const userId = req.session.refralcode;
-      newUser.referredBy = userId;
-      await walletSchema.findOneAndUpdate(
-        { userId },
-        {
-          $inc: { balance: 200 },
-          $push: {
-            transactions: {
-              type: "credit",
-              amount: 100,
-              description: "Refferal Bonus ",
+      const referralCode = req.session.refralcode;
+
+      try {
+        const owner = await userSchema.findOne({ refferalCode: referralCode });
+
+        if (owner) {
+          const userId = owner._id;
+
+          newUser.referredBy = userId;
+
+          await walletSchema.findOneAndUpdate(
+            { userId },
+            {
+              $inc: { balance: 200 },
+              $push: {
+                transactions: {
+                  type: "credit",
+                  amount: 200,
+                  description: "Referral Bonus",
+                  date: new Date(),
+                },
+              },
             },
-          },
-        },
-        { new: true, upsert: true }
-      );
+            { new: true, upsert: true }
+          );
+        } else {
+          console.log("Invalid referral code.");
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
 
     newUser

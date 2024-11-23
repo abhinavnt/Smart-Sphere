@@ -1027,7 +1027,7 @@
     <!-- refreal offer -->
     <script>
       document.getElementById('shareBtn').addEventListener('click', async () => {
-          const referralLink = `${window.location.origin}/signUp?referralCode=<%= user._id %>`;
+          const referralLink = `${window.location.origin}/signUp?referralCode=<%= user.refferalCode %>`;
   
           if (navigator.share) {
               
