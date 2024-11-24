@@ -92,6 +92,8 @@ function downloadInvoice() {
   pdf.setLineWidth(1);
   pdf.rect(5, 5, 200, 287); // Border around the entire page
 
+  const invoiceDate = new Date().toLocaleDateString();
+
   // Get order details
   const orderId = document.getElementById("orderID").innerText;
   const orderedDate = document.getElementById("orderedDate").innerText;
@@ -100,6 +102,13 @@ function downloadInvoice() {
   const totalAmount = document.getElementById("totalAmount").innerText;
   const offerDiscount = document.getElementById("offerDiscount").innerText;
   const couponDiscount = document.getElementById("coupondiscount").innerText;
+
+
+    // Add Invoice Date
+    pdf.setFontSize(12);
+    pdf.setTextColor(40);
+    pdf.setFont("helvetica", "normal");
+    pdf.text(`Invoice Date: ${invoiceDate}`, 12, 25);
 
   // Add order info with background and spacing
   pdf.setFontSize(12);

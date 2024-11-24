@@ -115,8 +115,8 @@
                             <% order.items.forEach(function(item) { %>
                             <tr>
                                 <td><%= order._id %></td>
-                                <td><%= order.userID.username %></td>
-                                <td><%= item.productID.name %></td>
+                                <td><%= order.userID && order.userID.username ? order.userID.username : 'N/A' %></td>
+                                <td><%= item.productID && item.productID.name ? item.productID.name : 'N/A' %></td>
                                 <td>
                                     <% if (item.cancelled) { %>
                                         <span class="badge bg-danger">Cancelled</span>

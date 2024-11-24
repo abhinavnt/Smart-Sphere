@@ -21,6 +21,7 @@ const order = async (req, res, next) => {
     const orders = await orderSchema
       .find()
       .populate("userID")
+      .populate("items.productID")
       .sort({ _id: -1 })
       .skip((currentPage - 1) * itemsPerPage)
       .limit(itemsPerPage);
@@ -44,6 +45,8 @@ const order = async (req, res, next) => {
       totalPagesStock,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).send("Server Error");
     // next()
   }

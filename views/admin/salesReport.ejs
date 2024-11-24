@@ -219,6 +219,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/js/admin/sales-report.js"></script>
 </body>
+
 <script>
     async function generateReport() {
         const startDate = document.getElementById('startDate').value;
@@ -300,5 +301,36 @@
 }
 
 </script>
+
+<div id="defaultReportData" data-report='<%- JSON.stringify(defaultReport) %>'></div>
+<script>
+      document.addEventListener("DOMContentLoaded", () => {
+    const reportData = JSON.parse(document.getElementById('defaultReportData').getAttribute('data-report'));
+    renderReport(reportData);
+  });
+  
+    function renderReport(data) {
+      const reportBody = document.getElementById('reportBody');
+      const totalSalesCount = document.getElementById('totalSalesCount');
+      const totalOrderAmount = document.getElementById('totalOrderAmount');
+      const totalDiscount = document.getElementById('totalDiscount');
+  
+      reportBody.innerHTML = data.orders.map(order => `
+        <tr>
+          <td>${order._id}</td>
+          <td>₹${order.totalAmount}</td>
+          <td>₹${order.couponDiscount || '0.00'}</td>
+          <td>₹${order.offerDiscount || '0.00'}</td>
+          <td>${order.shippingAddress?.fullname || 'N/A'}</td>
+          <td>${new Date(order.createdAt).toLocaleDateString('en-IN')}</td>
+        </tr>
+      `).join('');
+  
+      totalSalesCount.textContent = data.totalSales;
+      totalOrderAmount.textContent = `₹${data.totalAmount}`;
+      totalDiscount.textContent = `₹${data.totalDiscount}`;
+    }
+  </script>
+  
 
 </html>

@@ -10,7 +10,47 @@ const ExcelJS = require("exceljs");
 
 // to render sales report page
 const salesReport = async (req, res) => {
-  res.render("admin/salesReport");
+  const now = new Date();
+  const startDate = new Date(now.setDate(now.getDate() - 30)); 
+  const endDate = new Date();
+
+  const filter = {
+    orderDate: { $gte: startDate, $lte: endDate },
+  };
+
+  try {
+    const orders = await orderSchema.find(filter).populate("items.productID");
+
+    let totalAmount = 0;
+    let totalDiscount = 0;
+
+    orders.forEach((order) => {
+      totalAmount += order.totalAmount;
+
+      order.items.forEach((item) => {
+        const originalPrice = item.productID.price;
+        const quantity = item.quantity;
+
+        const discountAmount = originalPrice * quantity - item.price;
+
+        totalDiscount += discountAmount;
+      });
+    });
+
+    const totalSales = orders.length;
+
+    res.render("admin/salesReport", {
+      defaultReport: {
+        orders,
+        totalSales,
+        totalAmount,
+        totalDiscount,
+      },
+    });
+  } catch (error) {
+    console.error("Error generating default sales report:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 // to generate sales report
@@ -29,8 +69,6 @@ const generate = async (req, res) => {
         $lte: new Date(now.setHours(23, 59, 59, 999)),
       };
     } else if (frequency === "weekly") {
-      const now = new Date();
-
       const firstDayOfWeek = new Date(now);
       firstDayOfWeek.setDate(now.getDate() - now.getDay());
       firstDayOfWeek.setHours(0, 0, 0, 0);
@@ -78,6 +116,7 @@ const generate = async (req, res) => {
       totalDiscount,
     });
   } catch (error) {
+    console.error("Error generating report:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };

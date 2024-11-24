@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
     isBlocked: { type: Boolean, default: false },
     refferalCode:{type:String,required:true,unique:true}
   },
-  { timestamps: true }
+  { timestamps: true } 
 );
 
 // hashing passsword before saving
