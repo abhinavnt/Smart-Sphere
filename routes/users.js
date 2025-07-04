@@ -78,6 +78,7 @@ router.get('/checkout',userAuth.checkUserSession,checkoutcontroller.checkout)
 router.post('/checkout/submit/:id',userAuth.checkUserSession,checkoutcontroller.placeOrder)
 router.get('/order/confirmation/:orderId',userAuth.checkUserSession,checkoutcontroller.conformationOrder)
 router.post('/cart/applyCoupon',checkoutcontroller.applyCoupon)
+router.post('/cart/removeCoupon', checkoutcontroller.removeCoupon);
 
 //----------------------------------------------------------------orders------------------------------------------------------------------------------
 

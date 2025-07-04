@@ -325,7 +325,7 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <span>Discount:</span>
-                    <span>- ₹<%= discount %></span>
+                    <span id="discount">- ₹<%= discount %></span>
                 </div>
                 <div class="d-flex justify-content-between">
                     <span>Delivery Fee:</span>
@@ -336,21 +336,25 @@
                     <span id="total">₹<%= total %></span>
                 </div>
                 <br>
-                <div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
-                    <div class="flex-w flex-m m-r-20 m-tb-5">
-                        <input id="couponCodeInput" class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" placeholder="Coupon Code">
-                        <div id="applyCouponbtn" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15  trans-04 pointer m-tb-5" onclick="applyCoupon()">
-                            Apply Coupon
-                        </div>
-                    </div>
-                    <div class="error-message" id="couponCodeError"></div>
-                    <div class="success-message" id="couponSuccessMessage"></div>
-                  <!-- Compact Available Coupons Button -->
-             <button class="btn btn-outline-success mt-2 rounded-pill px-3 py-1" onclick="showAvailableCoupons()" style="font-size: 0.9rem;">
-             <i class="fas fa-tags mr-1"></i> Available Coupons
-             </button>
-
-                </div>
+                <!-- Replace the existing coupon input section in the order summary div -->
+<div class="flex-w flex-sb-m bor15 p-t-18 p-b-15 p-lr-40 p-lr-15-sm">
+  <div class="flex-w flex-m m-r-20 m-tb-5">
+    <input id="couponCodeInput" class="stext-104 cl2 plh4 size-117 bor13 p-lr-20 m-r-10 m-tb-5" type="text" placeholder="Coupon Code">
+    <div id="applyCouponbtn" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5" onclick="applyCoupon()">
+      Apply Coupon
+    </div>
+    <!-- NEW: Remove Coupon button (hidden by default) -->
+    <div id="removeCouponBtn" class="flex-c-m stext-101 cl2 size-118 bg8 bor13 hov-btn3 p-lr-15 trans-04 pointer m-tb-5" style="display: none; background-color: #dc3545; color: white;" onclick="removeCoupon()">
+      Remove Coupon
+    </div>
+  |</div>
+  <div class="error-message" id=" couponCodeError"></div>
+  <div class="success-message" id="couponSuccessMessage"></div>
+  <!-- Existing Available Coupons button (unchanged) -->
+  <button class="btn btn-outline-success mt-2 rounded-pill px-3 py-1" onclick="showAvailableCoupons()" style="font-size: 0.9rem;">
+    <i class="fas fa-tags mr-1"></i> Available Coupons
+  </button>
+</div>
             </div>
         </div>
     </div>
@@ -668,51 +672,93 @@ if (validateForm()) {
 
 
 <!-- applyCoupon -->
-    <script>
-    async function applyCoupon() {
-        const couponCode = document.getElementById('couponCodeInput').value;
-        
-        if (!couponCode) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Invalid Input',
-                text: 'Please enter a coupon code.',
-            });
-            return;
-        }
+<!-- Replace the existing applyCoupon script -->
+<script>
+async function applyCoupon() {
+  const couponCode = document.getElementById('couponCodeInput').value;
 
-        try {
-const response = await axios.post('/cart/applyCoupon', { couponCode });
-
-if (response.status === 200 && response.data.newTotal) {
-    console.log(response.data.newTotal);
-    
+  if (!couponCode) {
     Swal.fire({
+      icon: 'error',
+      title: 'Invalid Input',
+      text: 'Please enter a coupon code.',
+    });
+    return;
+  }
+
+  try {
+    const response = await axios.post('/cart/applyCoupon', { couponCode });
+
+    if (response.status === 200 && response.data.newTotal) {
+        console.log(response.data.discount,"discout");
+        
+      Swal.fire({
         icon: 'success',
         title: 'Success',
         text: response.data.message,
-    }).then(() => {
-        location.reload();
-    });
-} else {
-    // Handle error message from the server
-    Swal.fire({
+      }).then(() => {
+        // UPDATED: Display coupon code and show Remove Coupon button
+        document.getElementById('couponCodeInput').value = couponCode; // Show applied coupon code
+        document.getElementById('couponCodeInput').disabled = true; // Disable input after applying
+        document.getElementById('applyCouponbtn').style.display = 'none'; // Hide Apply button
+        document.getElementById('removeCouponBtn').style.display = 'block'; // Show Remove button
+        document.getElementById('total').textContent = `₹${response.data.newTotal+50}`; // Update total
+        document.getElementById('discount').textContent=`-₹${response.data.discount}`
+        
+      });
+    } else {
+      Swal.fire({
         icon: 'error',
         title: 'Error',
         text: response.data.message || 'An unexpected error occurred.',
-    });
-}
-} catch (error) {
-    // Handle errors thrown by the axios call itself (network errors, etc.)
+      });
+    }
+  } catch (error) {
     Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.message || 'Error applying coupon. Please try again.',
+      icon: 'error',
+      title: 'Error',
+      text: error.response?.data?.message || 'Error applying coupon. Please try again.',
     });
+  }
 }
 
-    }
-    </script>
+// NEW: Function to remove coupon
+async function removeCoupon() {
+  const couponCode = document.getElementById('couponCodeInput').value;
+
+  try {
+    const response = await axios.post('/cart/removeCoupon', { couponCode });
+
+    if (response.status === 200 && response.data.newTotal) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: response.data.message,
+      }).then(() => {
+        // Reset UI after removal
+        document.getElementById('couponCodeInput').value = ''; // Clear coupon input
+        document.getElementById('couponCodeInput').disabled = false; // Enable input
+        document.getElementById('applyCouponbtn').style.display = 'block'; // Show Apply button
+        document.getElementById('removeCouponBtn').style.display = 'none'; // Hide Remove button
+        document.getElementById('total').textContent = `₹${response.data.newTotal+50}`; // Update total
+        document.getElementById('discount').textContent=0
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: response.data.message || 'An unexpected error occurred.',
+      });
+    }
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: error.response?.data?.message || 'Error removing coupon. Please try again.',
+    });
+  }
+}
+</script>
 
 
 

@@ -436,7 +436,47 @@ const applyCoupon = async (req, res) => {
     coupon.usedBy.push(userId);
     await coupon.save();
 
-    res.status(200).json({ message: "Coupon applied successfully", newTotal });
+    res.status(200).json({ message: "Coupon applied successfully", newTotal,discount });
+  } catch (error) {
+    res.status(500).json({ message: "Something went wrong", error });
+  }
+};
+
+
+const removeCoupon = async (req, res) => {
+  const { couponCode } = req.body;
+  const userId = req.session.user._id;
+
+  try {
+    const coupon = await couponSchema.findOne({ couponCode });
+    if (!coupon) {
+      return res.status(400).json({ message: "Coupon not found" });
+    }
+    if (!coupon.usedBy.includes(userId)) {
+      return res.status(400).json({ message: "Coupon not applied by this user" });
+    }
+
+    // Remove user ID from usedBy array
+    coupon.usedBy = coupon.usedBy.filter(id => id.toString() !== userId.toString());
+    await coupon.save();
+
+    // Get the cart and add back the discount
+    const cart = await CartSchema.findOne({ userId });
+    const discount = req.session.couponDiscound || 0;
+    const newTotal = cart.totalPrice + discount;
+
+    // Update the cart total
+    await CartSchema.findOneAndUpdate(
+      { userId },
+      { totalPrice: newTotal },
+      { new: true }
+    );
+
+    // Clear session variables
+    delete req.session.couponDiscound;
+    delete req.session.minCartValue;
+    
+    res.status(200).json({ message: "Coupon removed successfully", newTotal });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", error });
   }
@@ -450,4 +490,5 @@ module.exports = {
   paymentSucess,
   handleRazorpayPayment,
   applyCoupon,
+  removeCoupon
 };
